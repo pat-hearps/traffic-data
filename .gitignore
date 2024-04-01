@@ -1,0 +1,47 @@
+# virtual env/s
+.venv*
+
+
+# IDE dirs
+.idea
+.vscode
+
+
+# specific files
+.env
+
+
+# caches
+__pycache__
+*.pyc
+*cache*
+.ipynb_checkpoints
+
+
+# folders
+data/
+figures/
+scratch/
+notebooks/
+
+
+# file types  (force-add any wanted in repo e.g. for config)
+*.ipynb
+*.pdf
+*.doc*
+*.xls*
+*.ppt*
+~$.*
+*.csv
+*.json
+*.txt
+*.log
+*.pqt
+*.parquet
+*.pickle
+*.pkl
+*.png
+*.jpg
+*.jpeg
+*.html
+
