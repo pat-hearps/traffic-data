@@ -1,0 +1,7 @@
+Django
+ipywidgets
+jupyterlab
+pandas
+plotly
+python-decouple
+requests
