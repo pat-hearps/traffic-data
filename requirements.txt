@@ -3,5 +3,6 @@ ipywidgets
 jupyterlab
 pandas
 plotly
+psycopg  # will actually install psycopg3
 python-decouple
 requests
