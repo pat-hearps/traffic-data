@@ -1,18 +1,10 @@
-import os
-from pathlib import Path, _posix_flavour, _windows_flavour  # type: ignore [attr-defined]
+from pathlib import Path
 from typing import Any
 
 
 class DotPath(Path):
-    """To enable adding Paths as nested attributes of other Paths, which is not possible with a
-    standard pathlib Path factory object. Replication _flavour setting from Path source code gets
-    around an issue with inheriting from Path, though is a little ugly."""
-
-    # why this? because of Path's __new__ method, see
-    # https://codereview.stackexchange.com/questions/162426/subclassing-pathlib-path
-    # also refer to whether a fix is implemented from
-    # https://discuss.python.org/t/fixing-subclassing-in-pathlib/8983/8
-    _flavour = _windows_flavour if os.name == "nt" else _posix_flavour
+    """To enable adding Paths as nested attributes of other Paths."""
+    pass
 
 
 # base DIR Path is (Dot)Path of the repository root directory
