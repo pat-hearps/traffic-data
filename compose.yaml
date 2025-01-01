@@ -6,6 +6,8 @@ services:
       - 9092:9092
     volumes:
       - kafka-traffic:/var/lib/kafka/data
+      - kafka-config:/mnt/shared/config
+      - kafka-secrets:/etc/kafka/secrets
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
@@ -22,3 +24,5 @@ services:
 
 volumes:
   kafka-traffic:
+  kafka-config:
+  kafka-secrets:
