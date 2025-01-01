@@ -5,6 +5,10 @@ import requests
 
 from core.config import API_KEY_TRAFFIC, URL_TRAFFIC, KAFKA_ADDR
 
+from core.log_config import get_logger
+
+log = get_logger(__name__)
+
 headers = {
     "Cache-Control": "no-cache",
     "Ocp-Apim-Subscription-Key": API_KEY_TRAFFIC
@@ -12,11 +16,14 @@ headers = {
 SEG_KEY_1 = "Chandler Hwy to Hoddle St"
 
 def main():
+    log.info("Connecting to kafka application")
+
     app = Application(
         broker_address=KAFKA_ADDR,
         loglevel="DEBUG"
     )
 
+    log.info("Hitting traffic API")
 
     resp = requests.get(url=URL_TRAFFIC, headers=headers)
 
@@ -24,11 +31,14 @@ def main():
         raise Exception(resp.text)
 
     rdict = resp.json()
+
+    log.info(f"Response dict len = {len(rdict)}")
+
     segment_properties = features_as_topic_dict(rdict['features'])
 
     if (segment := segment_properties.get(SEG_KEY_1)):
-        pass
 
+        log.info(f"logging segment {SEG_KEY_1}")
         
         with app.get_producer() as producer:
 
@@ -38,7 +48,11 @@ def main():
                 value=json.dumps(segment),
             )
 
-            
+
+        log.info("segment logged")
+    log.info("Finished")
+
+
 
 def features_as_topic_dict(features: list[dict]) -> dict:
     segment_props = {}
@@ -47,7 +61,7 @@ def features_as_topic_dict(features: list[dict]) -> dict:
         sgn = props.get('segmentName')
         if sgn:
             segment_props[sgn] = props
-    print(f"Found {len(segment_props)} features with properties")
+    log.info(f"Found {len(segment_props)} features with properties")
     return segment_props
 
 
