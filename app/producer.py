@@ -16,24 +16,21 @@ headers = {
 SEG_KEY_1 = "Chandler Hwy to Hoddle St"
 
 def main():
-    log.info("Connecting to kafka application")
+    log.info("Hitting traffic API")
+    resp = requests.get(url=URL_TRAFFIC, headers=headers)
 
+    if resp.status_code != 200:
+        raise Exception(resp.text)
+
+    log.info("Connecting to kafka application")
     app = Application(
         broker_address=KAFKA_ADDR,
         loglevel="DEBUG",
         auto_create_topics=True
     )
 
-    log.info("Hitting traffic API")
-
-    resp = requests.get(url=URL_TRAFFIC, headers=headers)
-
-    if resp.status_code != 200:
-        raise Exception(resp.text)
 
     rdict = resp.json()
-
-    log.info(f"Response dict len = {len(rdict)}")
 
     segment_properties = features_as_topic_dict(rdict['features'])
 
@@ -48,7 +45,6 @@ def main():
                 key=SEG_KEY_1,
                 value=json.dumps(segment),
             )
-
 
         log.info("segment logged")
     log.info("Finished")
