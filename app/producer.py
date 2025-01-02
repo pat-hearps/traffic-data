@@ -1,3 +1,4 @@
+from collections import defaultdict
 import json
 
 from quixstreams import Application
@@ -13,7 +14,7 @@ headers = {
     "Cache-Control": "no-cache",
     "Ocp-Apim-Subscription-Key": API_KEY_TRAFFIC
 }
-SEG_KEY_1 = "Chandler Hwy to Hoddle St"
+FWY_FILTER = "Eastern Fwy"
 
 def main():
     log.info("Hitting traffic API")
@@ -28,30 +29,27 @@ def main():
         loglevel="DEBUG",
         auto_create_topics=True
     )
+    # initial processing into format needed to log by topic=freeway, key=segment
+    resp_dict = resp.json()
+    segment_properties = features_as_segment_dict(resp_dict['features'])
+    freeway_segments = group_segments_by_freeway(segment_properties)
+    filtered_segments = freeway_segments[FWY_FILTER]
 
-
-    rdict = resp.json()
-
-    segment_properties = features_as_topic_dict(rdict['features'])
-
-    if (segment := segment_properties.get(SEG_KEY_1)):
-
-        log.info(f"logging segment {SEG_KEY_1}")
-        
-        with app.get_producer() as producer:
+    with app.get_producer() as producer:
+        for seg_name, properties in filtered_segments.items():
+            log.info(f"logging segment {seg_name}")
 
             producer.produce(
-                topic="MELBOURNE_TRAFFIC",
-                key=SEG_KEY_1,
-                value=json.dumps(segment),
+                topic=FWY_FILTER,
+                key=seg_name,
+                value=json.dumps(properties),
             )
-
-        log.info("segment logged")
+            log.info("segment logged")
     log.info("Finished")
 
 
 
-def features_as_topic_dict(features: list[dict]) -> dict:
+def features_as_segment_dict(features: list[dict]) -> dict:
     """Turn list of individual road segment (feature) dictionaries into
     a dictionary with keys = each unique segment name.
     """
@@ -63,6 +61,14 @@ def features_as_topic_dict(features: list[dict]) -> dict:
     log.info(f"Found {len(properties_by_segment)} features with properties")
     return properties_by_segment
 
+
+def group_segments_by_freeway(properties_by_segment: dict) -> dict:
+    """Reorganise segments to nested dict by each freeway"""
+    freeway_segments = defaultdict(dict)
+    for segment, properties in properties_by_segment.items():
+        freeway = properties["freewayName"]
+        freeway_segments[freeway][segment] = properties
+    return dict(freeway_segments)
 
 if __name__ == '__main__':
     main()
