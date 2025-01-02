@@ -20,7 +20,8 @@ def main():
 
     app = Application(
         broker_address=KAFKA_ADDR,
-        loglevel="DEBUG"
+        loglevel="DEBUG",
+        auto_create_topics=True
     )
 
     log.info("Hitting traffic API")
