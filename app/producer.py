@@ -52,14 +52,16 @@ def main():
 
 
 def features_as_topic_dict(features: list[dict]) -> dict:
-    segment_props = {}
+    """Turn list of individual road segment (feature) dictionaries into
+    a dictionary with keys = each unique segment name.
+    """
+    properties_by_segment = {}
     for feat in features:
-        props = feat.get('properties')
-        sgn = props.get('segmentName')
-        if sgn:
-            segment_props[sgn] = props
-    log.info(f"Found {len(segment_props)} features with properties")
-    return segment_props
+        properties = feat.get('properties')       
+        if seg_name := properties.get('segmentName'):
+            properties_by_segment[seg_name] = properties
+    log.info(f"Found {len(properties_by_segment)} features with properties")
+    return properties_by_segment
 
 
 if __name__ == '__main__':
