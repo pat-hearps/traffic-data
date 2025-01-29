@@ -1,11 +1,11 @@
 from datetime import datetime
 import json
-from pprint import pformat
 import time
 
 from quixstreams import Application
 
 from core.config import FWY_TOPIC, TZ_MELB
+from core.utils import JEncoder
 
 
 def main(freeway_topic: str = FWY_TOPIC):
@@ -33,7 +33,7 @@ def main(freeway_topic: str = FWY_TOPIC):
                 data = parse_data(json.loads(msg.value()))
                 offset = msg.offset()
 
-                print(f"{offset = }\n{key = }\n{pformat(data)}")
+                print(f"{offset = }\n{key = }\n{json.dumps(data, indent=4, cls=JEncoder)}")
                 consumer.store_offsets(msg)
             time.sleep(2)
 
