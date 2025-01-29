@@ -10,3 +10,6 @@ else:
     KAFKA_ADDR = "???"
 
 URL_TRAFFIC = "https://data-exchange-api.vicroads.vic.gov.au/opendata/variable/freewaytraveltime/v1/traffic"
+
+FWY_FILTER = "Eastern Fwy"
+FWY_TOPIC = FWY_FILTER.replace(" ", "_")

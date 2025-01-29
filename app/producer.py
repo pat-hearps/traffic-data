@@ -4,7 +4,7 @@ import json
 from quixstreams import Application
 import requests
 
-from core.config import API_KEY_TRAFFIC, URL_TRAFFIC, KAFKA_ADDR
+from core.config import API_KEY_TRAFFIC, URL_TRAFFIC, KAFKA_ADDR, FWY_TOPIC, FWY_FILTER
 
 from core.log_config import get_logger
 
@@ -14,8 +14,6 @@ headers = {
     "Cache-Control": "no-cache",
     "Ocp-Apim-Subscription-Key": API_KEY_TRAFFIC
 }
-FWY_FILTER = "Eastern Fwy"
-FWY_TOPIC = FWY_FILTER.replace(" ", "_")
 
 def main():
     log.info("Hitting traffic API")
