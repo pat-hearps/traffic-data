@@ -1,4 +1,5 @@
 from decouple import config
+import pytz
 
 API_KEY_TRAFFIC = config("API_KEY_TRAFFIC", cast=str)
 
@@ -13,3 +14,6 @@ URL_TRAFFIC = "https://data-exchange-api.vicroads.vic.gov.au/opendata/variable/f
 
 FWY_FILTER = "Eastern Fwy"
 FWY_TOPIC = FWY_FILTER.replace(" ", "_")
+
+TZ_MELB = pytz.timezone("Australia/Melbourne")
+
