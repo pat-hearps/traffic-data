@@ -1,9 +1,11 @@
+from datetime import datetime
 import json
+from pprint import pformat
 import time
 
 from quixstreams import Application
 
-from core.config import FWY_TOPIC
+from core.config import FWY_TOPIC, TZ_MELB
 
 
 def main(freeway_topic: str = FWY_TOPIC):
@@ -28,12 +30,19 @@ def main(freeway_topic: str = FWY_TOPIC):
                 raise Exception(msg.error())
             else:
                 key = msg.key().decode("utf8")
-                value = json.loads(msg.value())
+                data = parse_data(json.loads(msg.value()))
                 offset = msg.offset()
 
-                print(f"{offset} {key} {value}")
+                print(f"{offset = }\n{key = }\n{pformat(data)}")
                 consumer.store_offsets(msg)
             time.sleep(2)
+
+
+def parse_data(data: dict) -> dict:
+    """A few basic data type transformations"""
+    data["publishedTime"] = TZ_MELB.localize(datetime.fromisoformat(data["publishedTime"]))
+    data["source"]["sourceId"] = int(data["source"]["sourceId"])
+    return data
 
 
 if __name__ == "__main__":
