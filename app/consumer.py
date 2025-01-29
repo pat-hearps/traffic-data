@@ -41,7 +41,10 @@ def main(freeway_topic: str = FWY_TOPIC):
 def parse_data(data: dict) -> dict:
     """A few basic data type transformations"""
     data["publishedTime"] = TZ_MELB.localize(datetime.fromisoformat(data["publishedTime"]))
-    data["source"]["sourceId"] = int(data["source"]["sourceId"])
+    data["id"] = int(data["source"]["sourceId"])
+    data["parentPathId"] = int(data["parentPathId"])
+    del data["freewayName"]  # it's only ended up here because we've filtered to this freeway name
+    del data["source"]  # don't need, we have id, and extra dict nesting will be more confusing
     return data
 
 
