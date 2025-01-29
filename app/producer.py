@@ -15,6 +15,7 @@ headers = {
     "Ocp-Apim-Subscription-Key": API_KEY_TRAFFIC
 }
 FWY_FILTER = "Eastern Fwy"
+FWY_TOPIC = FWY_FILTER.replace(" ", "_")
 
 def main():
     log.info("Hitting traffic API")
@@ -35,12 +36,15 @@ def main():
     freeway_segments = group_segments_by_freeway(segment_properties)
     filtered_segments = freeway_segments[FWY_FILTER]
 
+    fwy_topic = app.topic(FWY_TOPIC)
+
     with app.get_producer() as producer:
+        log.info(f"producing {len(filtered_segments)} segments for {FWY_FILTER}")
         for seg_name, properties in filtered_segments.items():
             log.info(f"logging segment {seg_name}")
 
             producer.produce(
-                topic=FWY_FILTER,
+                topic=FWY_TOPIC,
                 key=seg_name,
                 value=json.dumps(properties),
             )
@@ -72,3 +76,6 @@ def group_segments_by_freeway(properties_by_segment: dict) -> dict:
 
 if __name__ == '__main__':
     main()
+    from quixstreams.models.topics import TopicAdmin
+    ta = TopicAdmin(KAFKA_ADDR)
+    log.info(f"TOPICS: {ta.list_topics()}")
