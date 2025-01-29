@@ -1,16 +1,23 @@
-from quixstreams import Application
 import json
-SEG_KEY_1 = "Chandler Hwy to Hoddle St"
+import time
 
-def main():
+from quixstreams import Application
+
+from core.config import FWY_TOPIC
+
+
+def main(freeway_topic: str = FWY_TOPIC):
     app = Application(
         broker_address="localhost:9092",
         loglevel="DEBUG",
         auto_offset_reset="earliest",
     )
 
+
     with app.get_consumer() as consumer:
-        consumer.subscribe(["MELBOURNE_TRAFFIC"])
+        print(f"TOPICS=\n{consumer.list_topics()}")
+        consumer.subscribe([freeway_topic])
+        
 
         while True:
             msg = consumer.poll(1)
@@ -26,6 +33,7 @@ def main():
 
                 print(f"{offset} {key} {value}")
                 consumer.store_offsets(msg)
+            time.sleep(2)
 
 
 if __name__ == "__main__":
