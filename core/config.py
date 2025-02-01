@@ -15,5 +15,7 @@ URL_TRAFFIC = "https://data-exchange-api.vicroads.vic.gov.au/opendata/variable/f
 FWY_FILTER = "Eastern Fwy"
 FWY_TOPIC = FWY_FILTER.replace(" ", "_")
 
-TZ_MELB = pytz.timezone("Australia/Melbourne")
+MELB_TZ_NAME = "Australia/Melbourne"
+TZ_MELB = pytz.timezone(MELB_TZ_NAME)
+
 

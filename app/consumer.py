@@ -5,7 +5,7 @@ import time
 import polars as pl
 from quixstreams import Application
 
-from core.config import FWY_TOPIC, TZ_MELB
+from core.config import FWY_TOPIC, MELB_TZ_NAME
 from core.utils import JEncoder
 
 
@@ -29,6 +29,7 @@ def main(freeway_topic: str = FWY_TOPIC):
             if msg is None:
                 if messages:
                     df = pl.DataFrame(messages)
+                    df = dateparse_df(df)
                     print(df)
                 print("Waiting...")
                 time.sleep(10)
@@ -44,10 +45,12 @@ def main(freeway_topic: str = FWY_TOPIC):
                 consumer.store_offsets(msg)
             
 
+def dateparse_df(df: pl.DataFrame, dt_col: str = 'publishedTime') -> pl.DataFrame:
+    df = df.with_columns(publishedTime=pl.col(dt_col).str.to_datetime().cast(pl.Datetime).dt.replace_time_zone(MELB_TZ_NAME))
+    return df
 
 def parse_data(data: dict) -> dict:
     """A few basic data type transformations"""
-    # data["publishedTime"] = TZ_MELB.localize(datetime.fromisoformat(data["publishedTime"]))
     data["id"] = int(data["source"]["sourceId"])
     data["parentPathId"] = int(data["parentPathId"])
     del data["freewayName"]  # it's only ended up here because we've filtered to this freeway name
