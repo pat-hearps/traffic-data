@@ -3,6 +3,9 @@ import pytz
 
 API_KEY_TRAFFIC = config("API_KEY_TRAFFIC", cast=str)
 
+GCS_PROJECT = config("GCS_PROJECT", cast=str)
+GCS_BUCKET = config("GCS_BUCKET", cast=str)
+
 ENVIRONMENT = config("ENVIRONMENT", cast=str, default="local")
 
 if ENVIRONMENT == "local":
