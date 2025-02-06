@@ -21,7 +21,7 @@ def main(freeway_topic: str = FWY_TOPIC):
 
 
     with app.get_consumer() as consumer:
-        print(f"TOPICS=\n{consumer.list_topics()}")
+
         consumer.subscribe([freeway_topic])
         
         messages = []
