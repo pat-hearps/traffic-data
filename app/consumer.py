@@ -1,11 +1,13 @@
 from datetime import datetime
 import json
-from pprint import pformat
 import time
 
+import polars as pl
 from quixstreams import Application
 
-from core.config import FWY_TOPIC, TZ_MELB
+from core.config import FWY_TOPIC, MELB_TZ_NAME, GCS_BUCKET, TZ_MELB
+from core.utils import JEncoder
+
 
 
 def main(freeway_topic: str = FWY_TOPIC):
@@ -20,28 +22,51 @@ def main(freeway_topic: str = FWY_TOPIC):
         print(f"TOPICS=\n{consumer.list_topics()}")
         consumer.subscribe([freeway_topic])
         
-
+        messages = []
         while True:
+            
             msg = consumer.poll(1)
 
             if msg is None:
+                if messages:
+                    
+                    now = datetime.now(tz=TZ_MELB)
+                    df = pl.DataFrame(messages)
+                    df = dateparse_df(df)
+                    print(f"Message queue empty, writing current data (len={len(df)}) to storage at {now.isoformat()}")
+                    print(df)
+                    filepath = f"{now.strftime("%Y/%m/%d")}/data_{now.strftime("%H%M%S")}.pqt"
+                    destination = f"gs://{GCS_BUCKET}/raw1/{filepath}"
+
+                    from app.cloud import write_df_pqt
+                    write_df_pqt(df, destination)
+                    print(f"written to {filepath}")
+                    del df
+                    messages = []
                 print("Waiting...")
+                time.sleep(10)
             elif msg.error() is not None:
                 raise Exception(msg.error())
             else:
                 key = msg.key().decode("utf8")
                 data = parse_data(json.loads(msg.value()))
+                messages.append(data)
                 offset = msg.offset()
 
-                print(f"{offset = }\n{key = }\n{pformat(data)}")
+                # print(f"{offset = }\n{key = }\n{json.dumps(data, indent=4, cls=JEncoder)}")
                 consumer.store_offsets(msg)
-            time.sleep(2)
+            
 
+def dateparse_df(df: pl.DataFrame, dt_col: str = 'publishedTime') -> pl.DataFrame:
+    df = df.with_columns(publishedTime=pl.col(dt_col).str.to_datetime().cast(pl.Datetime).dt.replace_time_zone(MELB_TZ_NAME))
+    return df
 
 def parse_data(data: dict) -> dict:
     """A few basic data type transformations"""
-    data["publishedTime"] = TZ_MELB.localize(datetime.fromisoformat(data["publishedTime"]))
-    data["source"]["sourceId"] = int(data["source"]["sourceId"])
+    data["id"] = int(data["source"]["sourceId"])
+    data["parentPathId"] = int(data["parentPathId"])
+    del data["freewayName"]  # it's only ended up here because we've filtered to this freeway name
+    del data["source"]  # don't need, we have id, and extra dict nesting will be more confusing
     return data
 
 
