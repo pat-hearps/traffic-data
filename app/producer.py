@@ -28,12 +28,14 @@ def main():
         loglevel="DEBUG",
         auto_create_topics=True
     )
+    
     # initial processing into format needed to log by topic=freeway, key=segment
     resp_dict = resp.json()
     segment_properties = features_as_segment_dict(resp_dict['features'])
     freeway_segments = group_segments_by_freeway(segment_properties)
     filtered_segments = freeway_segments[FWY_FILTER]
 
+    # need to create freeway topic
     fwy_topic = app.topic(FWY_TOPIC)
 
     with app.get_producer() as producer:

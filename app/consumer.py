@@ -6,8 +6,10 @@ import polars as pl
 from quixstreams import Application
 
 from core.config import FWY_TOPIC, MELB_TZ_NAME, GCS_BUCKET, TZ_MELB
+from core.log_config import get_logger
 from core.utils import JEncoder
 
+log = get_logger(__name__)
 
 
 def main(freeway_topic: str = FWY_TOPIC):
@@ -33,18 +35,21 @@ def main(freeway_topic: str = FWY_TOPIC):
                     now = datetime.now(tz=TZ_MELB)
                     df = pl.DataFrame(messages)
                     df = dateparse_df(df)
-                    print(f"Message queue empty, writing current data (len={len(df)}) to storage at {now.isoformat()}")
-                    print(df)
+                    log.info(f"Message queue empty, writing current data (len={len(df)}) to storage at {now.isoformat()}")
+                    log.info(f"dataframe=\n{df}")
                     filepath = f"{now.strftime("%Y/%m/%d")}/data_{now.strftime("%H%M%S")}.pqt"
                     destination = f"gs://{GCS_BUCKET}/raw1/{filepath}"
 
                     from app.cloud import write_df_pqt
                     write_df_pqt(df, destination)
-                    print(f"written to {filepath}")
+
+                    # clear data from memory
                     del df
                     messages = []
-                print("Waiting...")
+
+                log.info("Waiting...")
                 time.sleep(10)
+
             elif msg.error() is not None:
                 raise Exception(msg.error())
             else:
@@ -53,7 +58,7 @@ def main(freeway_topic: str = FWY_TOPIC):
                 messages.append(data)
                 offset = msg.offset()
 
-                # print(f"{offset = }\n{key = }\n{json.dumps(data, indent=4, cls=JEncoder)}")
+                log.debug(f"{offset = }\n{key = }\n{json.dumps(data, indent=4, cls=JEncoder)}")
                 consumer.store_offsets(msg)
             
 
