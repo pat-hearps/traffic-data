@@ -5,7 +5,7 @@ import time
 import polars as pl
 from quixstreams import Application
 
-from core.config import FWY_TOPIC, MELB_TZ_NAME, GCS_BUCKET, TZ_MELB
+from core.config import FWY_TOPIC, MELB_TZ_NAME, GCS_BUCKET, TZ_MELB, KAFKA_ADDR
 from core.log_config import get_logger
 from core.utils import JEncoder
 
@@ -14,7 +14,7 @@ log = get_logger(__name__)
 
 def main(freeway_topic: str = FWY_TOPIC):
     app = Application(
-        broker_address="localhost:9092",
+        broker_address=KAFKA_ADDR,
         loglevel="DEBUG",
         auto_offset_reset="earliest",
     )
