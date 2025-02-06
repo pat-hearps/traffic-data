@@ -22,18 +22,21 @@ def main():
     if resp.status_code != 200:
         raise Exception(resp.text)
 
-    log.info("Connecting to kafka application")
-    app = Application(
-        broker_address=KAFKA_ADDR,
-        loglevel="DEBUG",
-        auto_create_topics=True
-    )
     
     # initial processing into format needed to log by topic=freeway, key=segment
     resp_dict = resp.json()
     segment_properties = features_as_segment_dict(resp_dict['features'])
     freeway_segments = group_segments_by_freeway(segment_properties)
     filtered_segments = freeway_segments[FWY_FILTER]
+
+
+    log.info("Connecting to kafka application")
+    app = Application(
+        broker_address=KAFKA_ADDR,
+        loglevel="DEBUG",
+        auto_create_topics=True
+    )
+
 
     # need to create freeway topic
     fwy_topic = app.topic(FWY_TOPIC)
@@ -76,6 +79,4 @@ def group_segments_by_freeway(properties_by_segment: dict) -> dict:
 
 if __name__ == '__main__':
     main()
-    from quixstreams.models.topics import TopicAdmin
-    ta = TopicAdmin(KAFKA_ADDR)
-    log.info(f"TOPICS: {ta.list_topics()}")
+
