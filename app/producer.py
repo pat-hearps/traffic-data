@@ -9,6 +9,7 @@ from core.config import API_KEY_TRAFFIC, URL_TRAFFIC, KAFKA_ADDR, FWY_TOPIC, FWY
 from core.log_config import get_logger
 
 log = get_logger(__name__)
+log.info("Initiating producer module")
 
 headers = {
     "Cache-Control": "no-cache",
