@@ -5,8 +5,6 @@ from typing import Union
 
 from decouple import config
 
-from core.directory import DIR
-
 LOG_FORMAT = "%(levelname)-5s | %(asctime)s | %(module)s:%(lineno)-3s | %(message)s"
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S"
 VERBOSE = 5  # add chattier level option below DEBUG
@@ -14,9 +12,12 @@ logging.addLevelName(VERBOSE, "VERBOSE")
 # LOG_LEVEL can be changed via env variable
 LOG_LEVEL = config("LOG_LEVEL", default="INFO", cast=str).upper()
 
+DIR = Path(__file__).parent.parent.resolve()
+LOGDIR = DIR / "data" / "logs"
+LOGDIR.mkdir(parents=True, exist_ok=True)
 
 def get_logger(
-    name: str, level: Union[str, int] = LOG_LEVEL, log_file: Path = DIR.DATA.LOGS / "logs.log"
+    name: str, level: Union[str, int] = LOG_LEVEL, log_file: Path = LOGDIR / "logs.log"
 ) -> logging.Logger:
     """
     Sets up standardised logging formats and output. To be imported and used on a per-module basis.
