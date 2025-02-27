@@ -1,15 +1,15 @@
 from collections import defaultdict
-import json
+from datetime import datetime
 
-from quixstreams import Application
+import polars as pl
 import requests
 
-from core.config import API_KEY_TRAFFIC, URL_TRAFFIC, KAFKA_ADDR, FWY_TOPIC, FWY_FILTER
-
+from core.config import API_KEY_TRAFFIC, URL_TRAFFIC, FWY_TOPIC, FWY_FILTER, MELB_TZ_NAME, GCS_BUCKET, TZ_MELB
 from core.log_config import get_logger
 
+
 log = get_logger(__name__)
-log.info("Initiating producer module")
+log.info("Initiating traffic api to storage module")
 
 headers = {
     "Cache-Control": "no-cache",
@@ -18,6 +18,7 @@ headers = {
 
 def main():
     log.info("Hitting traffic API")
+    now = datetime.now(tz=TZ_MELB)
     resp = requests.get(url=URL_TRAFFIC, headers=headers)
 
     if resp.status_code != 200:
@@ -30,30 +31,19 @@ def main():
     freeway_segments = group_segments_by_freeway(segment_properties)
     filtered_segments = freeway_segments[FWY_FILTER]
 
+    parsed_segments = [parse_data(data) for data in filtered_segments.values()]
+    
+    df = pl.DataFrame(parsed_segments)
+    df = dateparse_df(df)
+    log.info(f"Writing current data (len={len(df)}) to storage at {now.isoformat()}")
+    log.info(f"dataframe=\n{df}")
+    filepath = f"{now.strftime("%Y/%m/%d")}/traffic_{FWY_TOPIC}_{now.strftime("%H%M%S")}.pqt"
+    destination = f"gs://{GCS_BUCKET}/raw1/{filepath}"
 
-    log.info("Connecting to kafka application")
-    app = Application(
-        broker_address=KAFKA_ADDR,
-        loglevel="DEBUG",
-        auto_create_topics=True
-    )
+    from app.cloud import write_df_pqt
+    write_df_pqt(df, destination)
 
-
-    # need to create freeway topic
-    fwy_topic = app.topic(FWY_TOPIC)
-
-    with app.get_producer() as producer:
-        log.info(f"producing {len(filtered_segments)} segments for {FWY_FILTER}")
-        for seg_name, properties in filtered_segments.items():
-            log.info(f"logging segment {seg_name}")
-
-            producer.produce(
-                topic=FWY_TOPIC,
-                key=seg_name,
-                value=json.dumps(properties),
-            )
-            log.info("segment logged")
-    log.info("Finished")
+    log.info("Completed latest data dump to storage")
 
 
 
@@ -78,6 +68,20 @@ def group_segments_by_freeway(properties_by_segment: dict) -> dict:
         freeway_segments[freeway][segment] = properties
     return dict(freeway_segments)
 
+
+
+def dateparse_df(df: pl.DataFrame, dt_col: str = 'publishedTime') -> pl.DataFrame:
+    df = df.with_columns(publishedTime=pl.col(dt_col).str.to_datetime().cast(pl.Datetime).dt.replace_time_zone(MELB_TZ_NAME))
+    return df
+
+def parse_data(data: dict) -> dict:
+    """A few basic data type transformations"""
+    data["id"] = int(data["source"]["sourceId"])
+    data["parentPathId"] = int(data["parentPathId"])
+    del data["freewayName"]  # it's only ended up here because we've filtered to this freeway name
+    del data["source"]  # don't need, we have id, and extra dict nesting will be more confusing
+    return data
+
+
 if __name__ == '__main__':
     main()
-
