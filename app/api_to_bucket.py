@@ -21,8 +21,9 @@ headers = {
 
 @app.get("/")
 def main():
-    log.info("Hitting traffic API")
     now = datetime.now(tz=TZ_MELB)
+    log.info(f"Hitting traffic API at {now.isoformat()}") 
+
     resp = requests.get(url=URL_TRAFFIC, headers=headers)
 
     if resp.status_code != 200:
