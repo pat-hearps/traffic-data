@@ -37,7 +37,7 @@ def main():
     df = dateparse_df(df)
     log.info(f"Writing current data (len={len(df)}) to storage at {now.isoformat()}")
     log.info(f"dataframe=\n{df}")
-    filepath = f"{now.strftime("%Y/%m/%d")}/traffic_{FWY_TOPIC}_{now.strftime("%H%M%S")}.pqt"
+    filepath = f'{now.strftime("%Y/%m/%d")}/traffic_{FWY_TOPIC}_{now.strftime("%H%M%S")}.pqt'
     destination = f"gs://{GCS_BUCKET}/raw1/{filepath}"
 
     from app.cloud import write_df_pqt
