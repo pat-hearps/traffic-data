@@ -5,15 +5,16 @@ name = "traffic-api-data"
 version = "0.0.1"
 requires-python = ">= 3.12"
 dependencies = [
+    "fastapi",
     "gcsfs",
     "google-cloud-storage",
     "polars",
     "pyarrow",
     "python-decouple",
     "pytz",
-    "quixstreams",
     "requests",
-    "ruff"
+    "ruff",
+    "uvicorn"
 ]
 
 

@@ -1,12 +1,15 @@
 from collections import defaultdict
 from datetime import datetime
 
+from fastapi import FastAPI
 import polars as pl
 import requests
+import uvicorn
 
 from core.config import API_KEY_TRAFFIC, URL_TRAFFIC, FWY_TOPIC, FWY_FILTER, MELB_TZ_NAME, GCS_BUCKET, TZ_MELB
 from core.log_config import get_logger
 
+app = FastAPI()
 
 log = get_logger(__name__)
 log.info("Initiating traffic api to storage module")
@@ -16,9 +19,11 @@ headers = {
     "Ocp-Apim-Subscription-Key": API_KEY_TRAFFIC
 }
 
+@app.get("/")
 def main():
-    log.info("Hitting traffic API")
     now = datetime.now(tz=TZ_MELB)
+    log.info(f"Hitting traffic API at {now.isoformat()}") 
+
     resp = requests.get(url=URL_TRAFFIC, headers=headers)
 
     if resp.status_code != 200:
@@ -84,4 +89,4 @@ def parse_data(data: dict) -> dict:
 
 
 if __name__ == '__main__':
-    main()
+    uvicorn.run("app.api_to_bucket:app", host="0.0.0.0", port=8080)
