@@ -8,6 +8,7 @@ dependencies = [
     "fastapi",
     "gcsfs",
     "google-cloud-storage",
+    "google-cloud-bigquery",
     "polars",
     "pyarrow",
     "python-decouple",
