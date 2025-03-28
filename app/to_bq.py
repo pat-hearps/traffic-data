@@ -1,5 +1,6 @@
 
 from datetime import datetime, date
+import subprocess
 import uuid
 
 import polars as pl
@@ -12,9 +13,10 @@ log = get_logger(__name__)
 
 
 def raw_to_loaded(dt_glob: str | None = None,
-                  raw_dir:str = "raw1"):
+                  raw_dir:str = "raw1",
+                  read_dir: str = "read1"):
     now = datetime.now(tz=TZ_MELB)
-    uid = uuid.uuid4()
+    uid = str(uuid.uuid4())
 
     lbl_filepath = "raw_file_path"
 
@@ -39,7 +41,7 @@ def raw_to_loaded(dt_glob: str | None = None,
     dupe_cols = list(set(df.columns) - {lbl_filepath})
 
     df=df.unique(keep="last",subset=dupe_cols)
-    df = df.with_columns(pl.lit(str(uid)).alias("batch_uid"))
+    df = df.with_columns(pl.lit(uid).alias("batch_uid"))
     log.info(f"dropped duplicates, added batch uid: {(df.shape)}")
 
 
@@ -59,4 +61,16 @@ def raw_to_loaded(dt_glob: str | None = None,
     write_to_bigquery(df_batch, tablename=f"{BQ_RAW_ZONE}.batches")
     log.info("batch load metadata written to 'batches' table")
 
+    # copy over loaded files, 
+    if dt_glob == "**":
+        src_dir = f"gs://{GCS_BUCKET}/{raw_dir}/*"
+    else:
+        src_dir = gs_path
 
+    trg_dir = src_dir.replace(raw_dir, read_dir).replace("/*", "/")
+
+    cmd = f"gcloud storage cp {src_dir} {trg_dir} --recursive"
+    log.info(f"running command: {cmd}")
+
+    subprocess.run(cmd.split(sep=" "))
+    log.info("Done")
