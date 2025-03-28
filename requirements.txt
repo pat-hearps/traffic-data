@@ -1,10 +1,10 @@
-fastapi==0.115.8
-gcsfs==2024.12.0
-google-cloud-storage==3.0.0
-polars==1.21.0
-pyarrow==19.0.0
+fastapi==0.115.12
+gcsfs==2025.3.0
+google-cloud-storage==3.1.0
+google-cloud-bigquery==3.31.0
+polars==1.26.0
+pyarrow==19.0.1
 python-decouple==3.8
-pytz==2024.2
+pytz==2025.2
 requests==2.32.3
-ruff==0.8.4
 uvicorn==0.34.0
