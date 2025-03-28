@@ -1,5 +1,6 @@
 
 from datetime import datetime, date
+import subprocess
 import uuid
 
 import polars as pl
@@ -12,7 +13,8 @@ log = get_logger(__name__)
 
 
 def raw_to_loaded(dt_glob: str | None = None,
-                  raw_dir:str = "raw1"):
+                  raw_dir:str = "raw1",
+                  read_dir: str = "read1"):
     now = datetime.now(tz=TZ_MELB)
     uid = str(uuid.uuid4())
 
@@ -59,4 +61,16 @@ def raw_to_loaded(dt_glob: str | None = None,
     write_to_bigquery(df_batch, tablename=f"{BQ_RAW_ZONE}.batches")
     log.info("batch load metadata written to 'batches' table")
 
+    # copy over loaded files, 
+    if dt_glob == "**":
+        src_dir = f"gs://{GCS_BUCKET}/{raw_dir}/*"
+    else:
+        src_dir = gs_path
 
+    trg_dir = src_dir.replace(raw_dir, read_dir).replace("/*", "/")
+
+    cmd = f"gcloud storage cp {src_dir} {trg_dir} --recursive"
+    log.info(f"running command: {cmd}")
+
+    subprocess.run(cmd.split(sep=" "))
+    log.info("Done")
