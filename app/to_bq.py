@@ -14,7 +14,7 @@ log = get_logger(__name__)
 def raw_to_loaded(dt_glob: str | None = None,
                   raw_dir:str = "raw1"):
     now = datetime.now(tz=TZ_MELB)
-    uid = uuid.uuid4()
+    uid = str(uuid.uuid4())
 
     lbl_filepath = "raw_file_path"
 
@@ -39,7 +39,7 @@ def raw_to_loaded(dt_glob: str | None = None,
     dupe_cols = list(set(df.columns) - {lbl_filepath})
 
     df=df.unique(keep="last",subset=dupe_cols)
-    df = df.with_columns(pl.lit(str(uid)).alias("batch_uid"))
+    df = df.with_columns(pl.lit(uid).alias("batch_uid"))
     log.info(f"dropped duplicates, added batch uid: {(df.shape)}")
 
 
