@@ -30,7 +30,7 @@ def write_to_bigquery(df: pl.DataFrame, tablename: str, project: str = GCS_PROJE
     client = bigquery.Client()
     # Write DataFrame to stream as parquet file; does not hit disk
     with io.BytesIO() as stream:
-        df.write_parquet(stream)
+        df.write_parquet(stream, use_pyarrow=True)
         log.info("df written to bytestream")
         stream.seek(0)  # reset to start of bytestream
         parquet_options = bigquery.ParquetOptions()
