@@ -1,5 +1,5 @@
 
-from datetime import datetime
+from datetime import datetime, date
 import uuid
 import polars as pl
 from core.config import TZ_MELB, GCS_BUCKET
@@ -8,14 +8,23 @@ from core.log_config import get_logger
 log = get_logger(__name__)
 
 
-def raw_to_loaded():
+def raw_to_loaded(dt_glob: str | None = None,
+                  raw_dir:str = "raw1"):
     now = datetime.now(tz=TZ_MELB)
     uid = uuid.uuid4()
 
     lbl_filepath = "raw_file_path"
 
-    # todo make this reading gcfs
-    gs_path = f"gs://{GCS_BUCKET}/raw1/**/*.pqt"
+    if dt_glob:
+        try:
+            date.fromisoformat("2025/03/01".replace("/","-"))
+        except ValueError:
+            log.error(f"dt_glob should be format YYYY/mm/dd - received {dt_glob}", exc_info=True)
+    else:
+        dt_glob="**"
+
+    gs_path = f"gs://{GCS_BUCKET}/{raw_dir}/{dt_glob}/*"
+
     df = pl.scan_parquet(gs_path, include_file_paths='raw_file_path').collect()
     log.info(f"read df from google cloud storage: {df.shape}")
 
