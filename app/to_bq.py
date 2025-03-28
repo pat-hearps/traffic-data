@@ -27,6 +27,7 @@ def raw_to_loaded(dt_glob: str | None = None,
         dt_glob="**"
 
     gs_path = f"gs://{GCS_BUCKET}/{raw_dir}/{dt_glob}/*"
+    log.info(f"Reading from {gs_path}")
 
     df = pl.scan_parquet(gs_path, include_file_paths='raw_file_path').collect()
     log.info(f"read df from google cloud storage: {df.shape}")
