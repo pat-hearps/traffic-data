@@ -1,8 +1,11 @@
 
 from datetime import datetime, date
 import uuid
+
 import polars as pl
-from core.config import TZ_MELB, GCS_BUCKET
+
+from app.cloud import write_to_bigquery
+from core.config import TZ_MELB, GCS_BUCKET, BQ_RAW_ZONE
 from core.log_config import get_logger
 
 log = get_logger(__name__)
@@ -45,5 +48,11 @@ def raw_to_loaded(dt_glob: str | None = None,
         "n_raw_files": df.n_unique(subset=[lbl_filepath]),
         "schema": schema
     })
+
+    write_to_bigquery(df, tablename=f"{BQ_RAW_ZONE}.loaded")
+    log.info("data written to bigquery 'loaded' table")
+
+    write_to_bigquery(df_batch, tablename=f"{BQ_RAW_ZONE}.batches")
+    log.info("batch load metadata written to 'batches' table")
 
 
