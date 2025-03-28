@@ -1,15 +1,12 @@
 from collections import defaultdict
 from datetime import datetime
 
-from fastapi import FastAPI
 import polars as pl
 import requests
-import uvicorn
 
 from core.config import API_KEY_TRAFFIC, URL_TRAFFIC, FWY_TOPIC, FWY_FILTER, MELB_TZ_NAME, GCS_BUCKET, TZ_MELB
 from core.log_config import get_logger
 
-app = FastAPI()
 
 log = get_logger(__name__)
 log.info("Initiating traffic api to storage module")
@@ -19,7 +16,6 @@ headers = {
     "Ocp-Apim-Subscription-Key": API_KEY_TRAFFIC
 }
 
-@app.get("/")
 def api_to_bucket():
     now = datetime.now(tz=TZ_MELB)
     log.info(f"Hitting traffic API at {now.isoformat()}") 
@@ -86,7 +82,3 @@ def parse_data(data: dict) -> dict:
     del data["freewayName"]  # it's only ended up here because we've filtered to this freeway name
     del data["source"]  # don't need, we have id, and extra dict nesting will be more confusing
     return data
-
-
-if __name__ == '__main__':
-    uvicorn.run("app.api_to_bucket:app", host="0.0.0.0", port=8080)
