@@ -26,4 +26,10 @@ dev = [
     "ruff"
 ]
 
+[tool.ruff]
+# Set the maximum line length to 99.
+line-length = 99
+skip-magic-trailing-comma = true
+# useful for pre-commit
+force-exclude = true
 
