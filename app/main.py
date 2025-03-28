@@ -1,5 +1,6 @@
 
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 import uvicorn
 
@@ -14,9 +15,13 @@ def hit_api_to_bucket():
     api_to_bucket()
 
 
-@app.get("/bq_load")
-def load_bucket_to_bq(dt_glob: str | None = None):
-    raw_to_loaded(dt_glob=dt_glob)
+class LoadPost(BaseModel):
+    dt_glob: str | None = None
+
+
+@app.post("/bq_load")
+def load_bucket_to_bq(loadpost: LoadPost):
+    raw_to_loaded(dt_glob=loadpost.dt_glob)
 
 
 if __name__ == '__main__':
