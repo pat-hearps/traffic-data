@@ -20,7 +20,7 @@ def raw_to_loaded(dt_glob: str | None = None,
 
     if dt_glob:
         try:
-            date.fromisoformat("2025/03/01".replace("/","-"))
+            date.fromisoformat(dt_glob.replace("/","-"))
         except ValueError:
             log.error(f"dt_glob should be format YYYY/mm/dd - received {dt_glob}", exc_info=True)
     else:
@@ -30,6 +30,9 @@ def raw_to_loaded(dt_glob: str | None = None,
 
     df = pl.scan_parquet(gs_path, include_file_paths='raw_file_path').collect()
     log.info(f"read df from google cloud storage: {df.shape}")
+    if len(df) == 0:
+        log.info("No data found")
+        return None
 
     # exclude raw_file_path col
     dupe_cols = list(set(df.columns) - {lbl_filepath})

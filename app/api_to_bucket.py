@@ -20,7 +20,7 @@ headers = {
 }
 
 @app.get("/")
-def main():
+def api_to_bucket():
     now = datetime.now(tz=TZ_MELB)
     log.info(f"Hitting traffic API at {now.isoformat()}") 
 
