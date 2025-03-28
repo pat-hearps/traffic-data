@@ -8,12 +8,12 @@ dependencies = [
     "fastapi",
     "gcsfs",
     "google-cloud-storage",
+    "google-cloud-bigquery",
     "polars",
     "pyarrow",
     "python-decouple",
     "pytz",
     "requests",
-    "ruff",
     "uvicorn"
 ]
 
@@ -21,7 +21,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "ipywidgets",
-    "jupyterlab"
+    "jupyterlab",
+    "marimo",
+    "ruff"
 ]
 
 

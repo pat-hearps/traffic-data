@@ -16,4 +16,6 @@ FWY_TOPIC = FWY_FILTER.replace(" ", "_")
 MELB_TZ_NAME = "Australia/Melbourne"
 TZ_MELB = pytz.timezone(MELB_TZ_NAME)
 
+BQ_RAW_ZONE = "raw_fetched_traffic_api"
+
 
