@@ -25,8 +25,3 @@ dev = [
     "marimo",
     "ruff"
 ]
-
-
-[[build.env]] 
-name = "GOOGLE_RUNTIME_VERSION" 
-value = "3.12"
