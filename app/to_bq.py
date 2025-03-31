@@ -37,7 +37,7 @@ def raw_to_loaded(
         return None
 
     # to send for moving to 'read' at end, get list prior to deduplication
-    all_file_paths = list(df.get_column(lbl_filepath))
+    all_file_paths = list(df.get_column(lbl_filepath).unique())
 
     # exclude raw_file_path col
     dupe_cols = list(set(df.columns) - {lbl_filepath})

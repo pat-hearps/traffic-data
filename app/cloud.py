@@ -3,6 +3,7 @@ from itertools import batched
 import math
 
 import polars as pl
+from google.api_core.exceptions import NotFound
 from google.cloud import bigquery
 from google.cloud import storage
 import gcsfs
@@ -59,19 +60,31 @@ def move_gs_files(
     bucket_name=GCS_BUCKET,
     n_per_batch: int = 100,
 ):
+    """Move specific list of files to a new folder,
+    first copies then deletes.
+    """
     client = storage.Client(project=GCS_PROJECT)
     bucket = client.get_bucket(bucket_name)
 
     n_batches = int(math.ceil((n_files := len(files)) / n_per_batch))
     log.info(f"Moving {n_files} files in {n_batches} batches")
+    
+    len_bucket_name = len(bucket_name) + 1  # +1 for '/' sign
+    file_names = [fn[fn.index(bucket_name) + len_bucket_name:] for fn in files]
 
-    for ib, batch_files in enumerate(batched(files, 100)):
+    for ib, batch_files in enumerate(batched(file_names, 100)):
         log.info(f"processing batch {ib + 1} / {n_batches}")
-        with client.batch():
-            batch_blobs = [bucket.get_blob(filename) for filename in batch_files]
+        batch_blobs = [bucket.get_blob(filename) for filename in batch_files]
         log.info(f"retrieved {len(batch_blobs)} blobs")
-        with client.batch():
-            for blob in batch_blobs:
+
+        with client.batch(raise_exception=False):
+            log.info("starting to move blobs")
+            for i, blob in enumerate(batch_blobs):
+                log.debug(f"trying to move {i} {blob.name}")
                 new_name = blob.name.replace(src_dir, trg_dir)
-                bucket.move_blob(blob, new_name=new_name)
-        log.info(f"batch {ib + 1} done")
+                bucket.copy_blob(blob, destination_bucket=bucket, new_name=new_name)
+
+        log.info("blobs copied, deleting originals")
+        bucket.delete_blobs(batch_blobs)
+
+        log.info(f"batch {ib + 1} of {n_batches} done")
