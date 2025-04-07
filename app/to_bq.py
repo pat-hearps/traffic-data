@@ -36,14 +36,20 @@ def raw_to_loaded(dt_glob: str | None = None, raw_dir: str = "raw1", read_dir: s
     log.info("Done")
 
 
-def process(uid: str, df: pl.DataFrame):
-    """Deduplicate to only unique values.
+def process(uid: str, df: pl.DataFrame, dt_col: str = "publishedTime"):
+    """Deduplicate to only unique values where a value has changed
+    relative to previous timestamp.
     Add extra column with batch uid.
     """
-    # exclude raw_file_path col
-    dupe_cols = list(set(df.columns) - {LBL_FILEPATH})
+    # make sure we've sorted before dropping duplicates
+    df = df.sort(dt_col)
 
-    df = df.unique(keep="last", subset=dupe_cols)
+    # exclude raw_file_path col and publishedTime col to only end up
+    # with rows where a value has changed from the previous API query
+    dupe_cols = list(set(df.columns) - {LBL_FILEPATH, dt_col})
+
+    # keep first timestamp that the value changed
+    df = df.unique(keep="first", subset=dupe_cols)
     df = df.with_columns(pl.lit(uid).alias("batch_uid"))
     log.info(f"dropped duplicates, added batch uid: {(df.shape)}")
     return df
