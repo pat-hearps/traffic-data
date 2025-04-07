@@ -28,6 +28,23 @@ def raw_to_loaded(dt_glob: str | None = None, raw_dir: str = "raw1", read_dir: s
     df = df.with_columns(pl.lit(uid).alias("batch_uid"))
     log.info(f"dropped duplicates, added batch uid: {(df.shape)}")
 
+    df_batch = make_batch_metadata_df(now, uid, df)
+
+    acl.write_to_bigquery(df, tablename=f"{BQ_RAW_ZONE}.loaded")
+    log.info("data written to bigquery 'loaded' table")
+
+    acl.write_to_bigquery(df_batch, tablename=f"{BQ_RAW_ZONE}.batches")
+    log.info("batch load metadata written to 'batches' table")
+
+    acl.move_gs_files(all_file_paths, src_dir=raw_dir, trg_dir=read_dir)
+
+    log.info("Done")
+
+
+def make_batch_metadata_df(now, uid, df) -> pl.DataFrame:
+    """Create single-row dataframe with metadata about this batch of loaded files,
+    for loading into batches table.
+    """
     schema = {col: str(dtype) for col, dtype in df.collect_schema().items()}
     df_batch = pl.DataFrame(
         {
@@ -39,16 +56,7 @@ def raw_to_loaded(dt_glob: str | None = None, raw_dir: str = "raw1", read_dir: s
             "schema": schema,
         }
     )
-
-    acl.write_to_bigquery(df, tablename=f"{BQ_RAW_ZONE}.loaded")
-    log.info("data written to bigquery 'loaded' table")
-
-    acl.write_to_bigquery(df_batch, tablename=f"{BQ_RAW_ZONE}.batches")
-    log.info("batch load metadata written to 'batches' table")
-
-    acl.move_gs_files(all_file_paths, src_dir=raw_dir, trg_dir=read_dir)
-
-    log.info("Done")
+    return df_batch
 
 
 def load_from_bucket(dt_glob: str, raw_dir: str) -> pl.DataFrame | None:
