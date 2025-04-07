@@ -37,7 +37,7 @@ def api_to_bucket():
     df = pl.DataFrame(parsed_segments)
     df = dateparse_df(df)
     log.info(f"Writing current data (len={len(df)}) to storage at {now.isoformat()}")
-    log.info(f"dataframe=\n{df}")
+    log.debug(f"dataframe=\n{df.head(3)}")
     filepath = f'{now.strftime("%Y/%m/%d")}/traffic_{FWY_TOPIC}_{now.strftime("%H%M%S")}.pqt'
     destination = f"gs://{GCS_BUCKET}/raw1/{filepath}"
 

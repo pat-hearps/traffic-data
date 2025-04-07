@@ -1,20 +1,19 @@
 
 from datetime import datetime, date
-import subprocess
 import uuid
 
 import polars as pl
 
-from app.cloud import write_to_bigquery
+import app.cloud as acl
 from core.config import TZ_MELB, GCS_BUCKET, BQ_RAW_ZONE
 from core.log_config import get_logger
 
 log = get_logger(__name__)
 
 
-def raw_to_loaded(dt_glob: str | None = None,
-                  raw_dir:str = "raw1",
-                  read_dir: str = "read1"):
+def raw_to_loaded(
+    dt_glob: str | None = None, raw_dir: str = "raw1", read_dir: str = "read1"
+):
     now = datetime.now(tz=TZ_MELB)
     uid = str(uuid.uuid4())
 
@@ -31,11 +30,14 @@ def raw_to_loaded(dt_glob: str | None = None,
     gs_path = f"gs://{GCS_BUCKET}/{raw_dir}/{dt_glob}/*"
     log.info(f"Reading from {gs_path}")
 
-    df = pl.scan_parquet(gs_path, include_file_paths='raw_file_path').collect()
+    df = pl.scan_parquet(gs_path, include_file_paths=lbl_filepath).collect()
     log.info(f"read df from google cloud storage: {df.shape}")
     if len(df) == 0:
         log.info("No data found")
         return None
+
+    # to send for moving to 'read' at end, get list prior to deduplication
+    all_file_paths = list(df.get_column(lbl_filepath).unique())
 
     # exclude raw_file_path col
     dupe_cols = list(set(df.columns) - {lbl_filepath})
@@ -55,22 +57,12 @@ def raw_to_loaded(dt_glob: str | None = None,
         "schema": schema
     })
 
-    write_to_bigquery(df, tablename=f"{BQ_RAW_ZONE}.loaded")
+    acl.write_to_bigquery(df, tablename=f"{BQ_RAW_ZONE}.loaded")
     log.info("data written to bigquery 'loaded' table")
 
-    write_to_bigquery(df_batch, tablename=f"{BQ_RAW_ZONE}.batches")
+    acl.write_to_bigquery(df_batch, tablename=f"{BQ_RAW_ZONE}.batches")
     log.info("batch load metadata written to 'batches' table")
 
-    # copy over loaded files, 
-    if dt_glob == "**":
-        src_dir = f"gs://{GCS_BUCKET}/{raw_dir}/*"
-    else:
-        src_dir = gs_path
+    acl.move_gs_files(all_file_paths, src_dir=raw_dir, trg_dir=read_dir)
 
-    trg_dir = src_dir.replace(raw_dir, read_dir).replace("/*", "/")
-
-    cmd = f"gcloud storage cp {src_dir} {trg_dir} --recursive"
-    log.info(f"running command: {cmd}")
-
-    subprocess.run(cmd.split(sep=" "))
     log.info("Done")
