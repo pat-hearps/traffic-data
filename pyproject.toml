@@ -24,6 +24,7 @@ dev = [
     "jupyterlab",
     "marimo",
     "pre-commit",
+    "pytest",
     "ruff"
 ]
 
