@@ -16,22 +16,7 @@ def raw_to_loaded(dt_glob: str | None = None, raw_dir: str = "raw1", read_dir: s
     now = datetime.now(tz=TZ_MELB)
     uid = str(uuid.uuid4())
 
-    if dt_glob:
-        try:
-            date.fromisoformat(dt_glob.replace("/", "-"))
-        except ValueError:
-            log.error(f"dt_glob should be format YYYY/mm/dd - received {dt_glob}", exc_info=True)
-    else:
-        dt_glob = "**"
-
-    gs_path = f"gs://{GCS_BUCKET}/{raw_dir}/{dt_glob}/*"
-    log.info(f"Reading from {gs_path}")
-
-    df = pl.scan_parquet(gs_path, include_file_paths=LBL_FILEPATH).collect()
-    log.info(f"read df from google cloud storage: {df.shape}")
-    if len(df) == 0:
-        log.info("No data found")
-        return None
+    df = load_from_bucket(dt_glob, raw_dir)
 
     # to send for moving to 'read' at end, get list prior to deduplication
     all_file_paths = list(df.get_column(LBL_FILEPATH).unique())
@@ -64,3 +49,27 @@ def raw_to_loaded(dt_glob: str | None = None, raw_dir: str = "raw1", read_dir: s
     acl.move_gs_files(all_file_paths, src_dir=raw_dir, trg_dir=read_dir)
 
     log.info("Done")
+
+
+def load_from_bucket(dt_glob: str, raw_dir: str) -> pl.DataFrame | None:
+    """Load all files (assumes parquet files) from specified source GCS bucket (raw prefix).
+    if dt_glob is provided (must be YYYY/mm/dd format), only search under that date prefix,
+    otherwise, load all files in the raw-prefixed directory.
+    """
+    if dt_glob:
+        try:
+            date.fromisoformat(dt_glob.replace("/", "-"))
+        except ValueError:
+            log.error(f"dt_glob should be format YYYY/mm/dd - received {dt_glob}", exc_info=True)
+    else:
+        dt_glob = "**"
+
+    gs_path = f"gs://{GCS_BUCKET}/{raw_dir}/{dt_glob}/*"
+    log.info(f"Reading from {gs_path}")
+
+    df = pl.scan_parquet(gs_path, include_file_paths=LBL_FILEPATH).collect()
+    log.info(f"read df from google cloud storage: {df.shape}")
+    if len(df) == 0:
+        log.info("No data found")
+        return None
+    return df
