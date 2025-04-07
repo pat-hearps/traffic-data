@@ -21,12 +21,7 @@ def raw_to_loaded(dt_glob: str | None = None, raw_dir: str = "raw1", read_dir: s
     # to send for moving to 'read' at end, get list prior to deduplication
     all_file_paths = list(df.get_column(LBL_FILEPATH).unique())
 
-    # exclude raw_file_path col
-    dupe_cols = list(set(df.columns) - {LBL_FILEPATH})
-
-    df = df.unique(keep="last", subset=dupe_cols)
-    df = df.with_columns(pl.lit(uid).alias("batch_uid"))
-    log.info(f"dropped duplicates, added batch uid: {(df.shape)}")
+    df = process(uid, df)
 
     df_batch = make_batch_metadata_df(now, uid, df)
 
@@ -39,6 +34,19 @@ def raw_to_loaded(dt_glob: str | None = None, raw_dir: str = "raw1", read_dir: s
     acl.move_gs_files(all_file_paths, src_dir=raw_dir, trg_dir=read_dir)
 
     log.info("Done")
+
+
+def process(uid: str, df: pl.DataFrame):
+    """Deduplicate to only unique values.
+    Add extra column with batch uid.
+    """
+    # exclude raw_file_path col
+    dupe_cols = list(set(df.columns) - {LBL_FILEPATH})
+
+    df = df.unique(keep="last", subset=dupe_cols)
+    df = df.with_columns(pl.lit(uid).alias("batch_uid"))
+    log.info(f"dropped duplicates, added batch uid: {(df.shape)}")
+    return df
 
 
 def make_batch_metadata_df(now, uid, df) -> pl.DataFrame:
