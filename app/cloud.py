@@ -1,32 +1,28 @@
 import io
-from itertools import batched
 import math
+from itertools import batched
 
+import gcsfs
 import polars as pl
 from google.api_core.exceptions import NotFound
-from google.cloud import bigquery
-from google.cloud import storage
-import gcsfs
+from google.cloud import bigquery, storage
 
-from core.config import GCS_PROJECT, GCS_BUCKET
+from core.config import GCS_BUCKET, GCS_PROJECT
 from core.log_config import get_logger
 
 log = get_logger(__name__)
 
 
-
 def write_df_pqt(df: pl.DataFrame, destination: str) -> None:
     log.debug("Trying to acquire gc filesystem")
-    fs = gcsfs.GCSFileSystem(token="google_default",
-                            project=GCS_PROJECT,
-                            access="read_write")
+    fs = gcsfs.GCSFileSystem(token="google_default", project=GCS_PROJECT, access="read_write")
     log.info("GCSFS acquired")
     log.debug(f"Attempting to open fs destination: {destination}")
     # Write the DataFrame to a Parquet file directly in GCS
-    with fs.open(destination, mode='wb') as f:
+    with fs.open(destination, mode="wb") as f:
         log.debug("Destination open, writing parquet")
         df.write_parquet(f)
-    
+
     log.debug(f"Dataframe written to {destination}")
 
 
@@ -44,8 +40,7 @@ def write_to_bigquery(df: pl.DataFrame, tablename: str, project: str = GCS_PROJE
             destination=tablename,
             project=project,
             job_config=bigquery.LoadJobConfig(
-                source_format=bigquery.SourceFormat.PARQUET,
-                parquet_options=parquet_options,
+                source_format=bigquery.SourceFormat.PARQUET, parquet_options=parquet_options
             ),
         )
         log.info("job created, calling, waiting")
@@ -68,9 +63,9 @@ def move_gs_files(
 
     n_batches = int(math.ceil((n_files := len(files)) / n_per_batch))
     log.info(f"Moving {n_files} files in {n_batches} batches")
-    
+
     len_bucket_name = len(bucket_name) + 1  # +1 for '/' sign
-    file_names = [fn[fn.index(bucket_name) + len_bucket_name:] for fn in files]
+    file_names = [fn[fn.index(bucket_name) + len_bucket_name :] for fn in files]
 
     for ib, batch_files in enumerate(batched(file_names, 100)):
         log.info(f"processing batch {ib + 1} / {n_batches}")

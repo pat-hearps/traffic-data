@@ -1,8 +1,10 @@
 import json
 from datetime import datetime
 
+
 class JEncoder(json.JSONEncoder):
     """Handle datetimes in json"""
+
     # Override default() method
     def default(self, obj):
         # Datetime to isoformat string

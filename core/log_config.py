@@ -16,6 +16,7 @@ DIR = Path(__file__).parent.parent.resolve()
 LOGDIR = DIR / "data" / "logs"
 LOGDIR.mkdir(parents=True, exist_ok=True)
 
+
 def get_logger(
     name: str, level: Union[str, int] = LOG_LEVEL, log_file: Path = LOGDIR / "logs.log"
 ) -> logging.Logger:
