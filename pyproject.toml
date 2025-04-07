@@ -23,6 +23,7 @@ dev = [
     "ipywidgets",
     "jupyterlab",
     "marimo",
+    "pre-commit",
     "ruff"
 ]
 
