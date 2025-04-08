@@ -16,12 +16,14 @@ def read_test_data(filepath: str | Path) -> pl.DataFrame:
     df = pd.read_fwf(filepath)
 
     dt_cols = infer_datetime_cols(df)
-    if dt_cols:
-        for dt_col in dt_cols:
-            # we've already checked for isoformat so to_datetime array function will work
-            df[dt_col] = pd.to_datetime(df[dt_col])
 
-    return pl.from_pandas(df)
+    df = pl.from_pandas(df)
+
+    if dt_cols:
+        col_exprs = {dt_col: pl.col(dt_col).str.to_datetime() for dt_col in dt_cols}
+        df = df.with_columns(**col_exprs)
+
+    return df
 
 
 def write_test_data(
