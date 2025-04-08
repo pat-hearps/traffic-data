@@ -9,6 +9,7 @@ dependencies = [
     "gcsfs",
     "google-cloud-storage",
     "google-cloud-bigquery",
+    "pandas",
     "polars",
     "pyarrow",
     "python-decouple",
