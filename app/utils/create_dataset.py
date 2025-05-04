@@ -5,6 +5,7 @@ from core.log_config import get_logger
 
 log = get_logger(__name__)
 
+
 def datasets_exist(datasets_req: list[str] = [BQ_RAW_ZONE, BQ_SILVER]):
     """Idempotently make sure BQ datasets exist as configured"""
     client = bigquery.Client()
@@ -12,7 +13,7 @@ def datasets_exist(datasets_req: list[str] = [BQ_RAW_ZONE, BQ_SILVER]):
     datasets_exist = [ds.dataset_id for ds in client.list_datasets()]
 
     log.info(f"datasets existing= {datasets_exist}")
-    
+
     missing = [ds for ds in datasets_req if ds not in datasets_exist]
 
     if len(missing):
@@ -20,7 +21,7 @@ def datasets_exist(datasets_req: list[str] = [BQ_RAW_ZONE, BQ_SILVER]):
 
         for dataset in missing:
             create_dataset(dataset, client)
-            
+
 
 def create_dataset(dataset_id: str, client: bigquery.Client, location: str = DATASET_LOCATION):
     # From https://cloud.google.com/bigquery/docs/datasets
