@@ -19,3 +19,5 @@ MELB_TZ_NAME = "Australia/Melbourne"
 TZ_MELB = pytz.timezone(MELB_TZ_NAME)
 
 BQ_RAW_ZONE = "raw_fetched_traffic_api"
+BQ_SILVER = "silver_traffic"
+DATASET_LOCATION = "europe-north1"
