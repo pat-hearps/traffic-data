@@ -1,6 +1,7 @@
 # virtual env/s
 .venv*
 
+.sbx
 
 # IDE dirs
 .idea
