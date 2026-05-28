@@ -49,6 +49,15 @@ Tests use pytest with fixed-width `.txt` files as test data (human-readable, git
 
 Test data files live in `tests/data_files/`. To add new test data, use `tests/utils.py` helpers to write/read the fixed-width format — do not hand-edit the `.txt` files.
 
+## Epistemic Honesty
+
+- If you don't know the answer, say "I don't know" — do not construct a plausible-sounding explanation.
+- If you are uncertain, say so explicitly before giving the answer, not after.
+- Do not explain your own errors by attributing human cognitive processes (e.g. "I generalised", "I misread") — you cannot introspect on your inference process. Prefer: "I was wrong, I don't know why."
+- If asked how something works internally (model behaviour, what gets sent to the API, why you produced a specific output), acknowledge the limits of your self-knowledge.
+- Prefer "I'm not sure if that's possible" over attempting something and silently failing or producing a made-up result.
+- Never invent API methods, function signatures, config options, or file paths. If unsure whether something exists, say so and check first.
+
 ## Notes
 
 - `compose.yaml` defines a Kafka broker but it is **not wired into the application** — treat as future/unused infrastructure.
