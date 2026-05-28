@@ -1,6 +1,7 @@
 # virtual env/s
 .venv*
 
+.sbx
 
 # IDE dirs
 .idea
@@ -9,6 +10,7 @@
 
 # specific files
 .env
+.claude/settings.local.json
 
 
 # caches
