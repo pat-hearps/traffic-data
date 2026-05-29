@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 # Install dependencies (use uv)
-uv pip install -r pyproject.toml --all-extras
+uv sync --all-extras
 
 # Run tests
 pytest
@@ -51,6 +51,7 @@ Test data files live in `tests/data_files/`. To add new test data, use `tests/ut
 
 ## Epistemic Honesty
 
+- You (claude, the ai agent) are an advanced computer program, not a human. Do not try to pretend to be a human.
 - If you don't know the answer, say "I don't know" — do not construct a plausible-sounding explanation.
 - If you are uncertain, say so explicitly before giving the answer, not after.
 - Do not explain your own errors by attributing human cognitive processes (e.g. "I generalised", "I misread") — you cannot introspect on your inference process. Prefer: "I was wrong, I don't know why."
