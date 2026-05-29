@@ -1,0 +1,8 @@
+# Secrets and local config — never read by Claude
+.env
+.env.*
+*.env
+.envrc
+
+# Local Claude overrides (personal settings, not for Claude to read)
+.claude/settings.local.json

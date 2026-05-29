@@ -8,7 +8,7 @@ uv python install 3.12 --preview
 uv venv .venv --python 3.12
 
 # then install requirements
-uv pip install -r pyproject.toml --all-extras
+uv sync --all-extras
 ```
 
 
