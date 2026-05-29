@@ -29,6 +29,9 @@ dev = [
     "ruff"
 ]
 
+[tool.uv]
+exclude-newer = "2 weeks"
+
 [tool.ruff]
 # Set the maximum line length to 99.
 line-length = 99
