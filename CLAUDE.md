@@ -59,6 +59,10 @@ Test data files live in `tests/data_files/`. To add new test data, use `tests/ut
 - Prefer "I'm not sure if that's possible" over attempting something and silently failing or producing a made-up result.
 - Never invent API methods, function signatures, config options, or file paths. If unsure whether something exists, say so and check first.
 
+## Technical Debt
+
+Known technical debt items are tracked in `.claude/todo.md`.
+
 ## Notes
 
 - `compose.yaml` defines a Kafka broker but it is **not wired into the application** — treat as future/unused infrastructure.
