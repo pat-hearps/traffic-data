@@ -22,12 +22,14 @@ headers = {"Cache-Control": "no-cache", "Ocp-Apim-Subscription-Key": API_KEY_TRA
 
 
 def api_to_bucket():
+    """Fetch traffic data from VicRoads API, process it, and write to GCS."""
     resp_dict, now = fetch_vicroads_data()
     df = process_traffic_data(resp_dict)
     save_to_gcs_bucket(df, now)
 
 
 def fetch_vicroads_data() -> tuple[dict, datetime]:
+    """Hit the VicRoads API and return the raw JSON response dict and request timestamp."""
     now = datetime.now(tz=TZ_MELB)
     log.info(f"Hitting traffic API at {now.isoformat()}")
     resp = requests.get(url=URL_TRAFFIC, headers=headers)
@@ -37,6 +39,7 @@ def fetch_vicroads_data() -> tuple[dict, datetime]:
 
 
 def process_traffic_data(resp_dict: dict) -> pl.DataFrame:
+    """Transform raw API response JSON into a filtered, parsed Polars DataFrame."""
     segment_properties = features_as_segment_dict(resp_dict["features"])
     freeway_segments = group_segments_by_freeway(segment_properties)
     filtered_segments = freeway_segments[FWY_FILTER]
@@ -46,6 +49,7 @@ def process_traffic_data(resp_dict: dict) -> pl.DataFrame:
 
 
 def save_to_gcs_bucket(df: pl.DataFrame, now: datetime) -> None:
+    """Write DataFrame to GCS as a timestamped parquet file under raw1/."""
     filepath = f"{now.strftime('%Y/%m/%d')}/traffic_{FWY_TOPIC}_{now.strftime('%H%M%S')}.pqt"
     destination = f"gs://{GCS_BUCKET}/raw1/{filepath}"
     log.info(f"Writing current data (len={len(df)}) to storage at {now.isoformat()}")
