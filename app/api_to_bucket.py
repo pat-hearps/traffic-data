@@ -14,6 +14,7 @@ from core.config import (
     URL_TRAFFIC,
 )
 from core.log_config import get_logger
+from core.utils import hide_keys
 
 log = get_logger(__name__)
 log.info("Initiating traffic api to storage module")
@@ -32,6 +33,7 @@ def fetch_vicroads_data() -> tuple[dict, datetime]:
     """Hit the VicRoads API and return the raw JSON response dict and request timestamp."""
     now = datetime.now(tz=TZ_MELB)
     log.info(f"Hitting traffic API at {now.isoformat()}")
+    log.debug(f"Requesting URL: '{URL_TRAFFIC}'\nwith headers={hide_keys(headers)}")
     resp = requests.get(url=URL_TRAFFIC, headers=headers)
     log.info(f"status={resp.status_code}")
     if resp.status_code != 200:
@@ -54,7 +56,7 @@ def save_to_gcs_bucket(df: pl.DataFrame, now: datetime) -> None:
     filepath = f"{now.strftime('%Y/%m/%d')}/traffic_{FWY_TOPIC}_{now.strftime('%H%M%S')}.pqt"
     destination = f"gs://{GCS_BUCKET}/raw1/{filepath}"
     log.info(f"Writing current data (len={len(df)}) to storage at {now.isoformat()}")
-    log.debug(f"dataframe=\n{df.head(3)}")
+    log.debug(f"{destination=}\ndataframe=\n{df.head(3)}")
     from app.cloud import write_df_pqt
 
     write_df_pqt(df, destination)
