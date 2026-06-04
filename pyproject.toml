@@ -9,7 +9,6 @@ dependencies = [
     "gcsfs",
     "google-cloud-storage",
     "google-cloud-bigquery",
-    "pandas",
     "polars",
     "pyarrow",
     "python-decouple",
@@ -21,10 +20,11 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "ipywidgets",
-    "jupyterlab",
-    "marimo",
+    "marimo"
+]
+ci = [
     "pre-commit",
+    "pandas",  # only used by testing utils for fixed width txt file i/o
     "pytest",
     "ruff"
 ]
