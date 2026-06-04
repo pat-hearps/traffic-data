@@ -15,7 +15,7 @@ from core.config import (
     URL_TRAFFIC,
 )
 from core.log_config import get_logger
-from core.utils import hide_keys
+from core.utils import hide_keys, ms_since
 
 log = get_logger(__name__)
 log.info("Initiating traffic api to storage module")
@@ -37,10 +37,9 @@ def fetch_vicroads_data() -> tuple[dict, datetime]:
     log.debug(f"Requesting URL: '{URL_TRAFFIC}'\nwith headers={hide_keys(headers)}")
     t0 = time.perf_counter()
     resp = requests.get(url=URL_TRAFFIC, headers=headers)
-    elapsed_ms = (time.perf_counter() - t0) * 1000
     log.info(f"status={resp.status_code}")
     log.debug(
-        f"API call elapsed_ms={elapsed_ms:.1f}\n"
+        f"API call elapsed_ms={ms_since(t0)}\n"
         f"response_size_bytes={len(resp.content)}\n"
         f"resp.headers={hide_keys(dict(resp.headers))}"
     )
@@ -71,8 +70,7 @@ def process_traffic_data(resp_dict: dict) -> pl.DataFrame:
     )
     df = pl.DataFrame(parsed_segments)
     result = dateparse_df(df)
-    elapsed_ms = (time.perf_counter() - t0) * 1000
-    log.debug(f"process_traffic_data elapsed_ms={elapsed_ms:.1f}")
+    log.debug(f"process_traffic_data elapsed_ms={ms_since(t0)}")
     return result
 
 
@@ -91,8 +89,7 @@ def save_to_gcs_bucket(df: pl.DataFrame, now: datetime) -> None:
 
     t0 = time.perf_counter()
     write_df_pqt(df, destination)
-    elapsed_ms = (time.perf_counter() - t0) * 1000
-    log.debug(f"GCS write elapsed_ms={elapsed_ms:.1f}")
+    log.debug(f"GCS write elapsed_ms={ms_since(t0)}")
     log.info("Completed latest data dump to storage")
 
 

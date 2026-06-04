@@ -1,4 +1,5 @@
 import json
+import time
 from datetime import datetime
 from math import ceil
 
@@ -14,6 +15,11 @@ class JEncoder(json.JSONEncoder):
 
         # Default behavior for all other types
         return super().default(obj)
+
+
+def ms_since(t0: float) -> str:
+    """Return elapsed milliseconds since a time.perf_counter() start, formatted to 1 decimal point."""
+    return f"{(time.perf_counter() - t0) * 1000:.1f}"
 
 
 def hide_keys(indict: dict) -> dict:
