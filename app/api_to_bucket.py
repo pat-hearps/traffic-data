@@ -18,7 +18,11 @@ from core.log_config import get_logger
 log = get_logger(__name__)
 log.info("Initiating traffic api to storage module")
 
-headers = {"Cache-Control": "no-cache", "Ocp-Apim-Subscription-Key": API_KEY_TRAFFIC}
+headers = {
+    "Cache-Control": "no-cache",
+    "KeyID": API_KEY_TRAFFIC,
+    "Accept": "application/json"
+    }
 
 
 def api_to_bucket():
@@ -33,6 +37,7 @@ def fetch_vicroads_data() -> tuple[dict, datetime]:
     now = datetime.now(tz=TZ_MELB)
     log.info(f"Hitting traffic API at {now.isoformat()}")
     resp = requests.get(url=URL_TRAFFIC, headers=headers)
+    log.info(f"status={resp.status_code}")
     if resp.status_code != 200:
         raise Exception(resp.text)
     return resp.json(), now
