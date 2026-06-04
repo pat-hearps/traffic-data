@@ -8,9 +8,7 @@ GCS_BUCKET = config("GCS_BUCKET", cast=str)
 
 ENVIRONMENT = config("ENVIRONMENT", cast=str, default="local")
 
-URL_TRAFFIC = (
-    "https://api.opendata.transport.vic.gov.au/opendata/roads/traffic/freeway-travel-time/v1/traffic"
-)
+URL_TRAFFIC = "https://api.opendata.transport.vic.gov.au/opendata/roads/traffic/freeway-travel-time/v1/traffic"
 
 FWY_FILTER = "Eastern Fwy"
 FWY_TOPIC = FWY_FILTER.replace(" ", "_")

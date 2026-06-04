@@ -18,11 +18,7 @@ from core.log_config import get_logger
 log = get_logger(__name__)
 log.info("Initiating traffic api to storage module")
 
-headers = {
-    "Cache-Control": "no-cache",
-    "KeyID": API_KEY_TRAFFIC,
-    "Accept": "application/json"
-    }
+headers = {"Cache-Control": "no-cache", "KeyID": API_KEY_TRAFFIC, "Accept": "application/json"}
 
 
 def api_to_bucket():
