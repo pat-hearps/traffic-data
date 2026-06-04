@@ -16,7 +16,10 @@
       "Bash(python *)",
       "Bash(python3 *)",
       "Bash(uv *)",
-      "Bash(cat *)"
+      "Bash(cat *)",
+      "Bash(pip *)",
+      "Bash(pip3 *)",
+      "Bash(git clone *)"
     ],
     "disableBypassPermissionsMode": "disable"
   },
