@@ -8,17 +8,18 @@
       "Bash(git diff *)",
       "Bash(git log *)",
       "Bash(git show *)",
-      "Bash(git branch *)"
+      "Bash(git branch *)",
+      "Bash(python*)"
     ],
     "deny": [
       "Bash(rm -rf *)",
       "Bash(git push --force *)",
-      "Bash(python *)",
-      "Bash(python3 *)",
       "Bash(uv *)",
-      "Bash(cat *)"
+      "Bash(pip *)",
+      "Bash(pip3 *)",
+      "Bash(git clone *)"
     ],
-    "disableBypassPermissionsMode": "disable"
+#    "disableBypassPermissionsMode": "disable"
   },
   "cleanupPeriodDays": 90
 }

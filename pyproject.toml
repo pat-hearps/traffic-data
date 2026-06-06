@@ -2,8 +2,8 @@
 
 [project]
 name = "traffic-api-data"
-version = "0.0.1"
-requires-python = ">= 3.12"
+version = "0.0.1.dev1"
+requires-python = "== 3.13.7"
 dependencies = [
     "fastapi",
     "gcsfs",
@@ -23,12 +23,12 @@ dev = [
     "marimo"
 ]
 ci = [
+    "bump-my-version",
     "pre-commit",
     "pandas",  # only used by testing utils for fixed width txt file i/o
     "pytest",
     "ruff"
 ]
-
 [tool.uv]
 exclude-newer = "2 weeks"
 

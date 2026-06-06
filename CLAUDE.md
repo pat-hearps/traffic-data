@@ -59,6 +59,14 @@ Test data files live in `tests/data_files/`. To add new test data, use `tests/ut
 - Prefer "I'm not sure if that's possible" over attempting something and silently failing or producing a made-up result.
 - Never invent API methods, function signatures, config options, or file paths. If unsure whether something exists, say so and check first.
 
+## Security Constraints
+
+- GitHub access is via a restricted personal access token scoped only to this project's repository (`pat-hearps/traffic-data`). Do not attempt to access other GitHub repositories using this token.
+- Do **not** clone, fetch, or download code from any external repository (including public GitHub repos) without explicit user instruction for each specific case.
+- Do **not** run `pip install`, `pip3 install`, or `uv add` / `uv pip install` to install packages from external sources without explicit user instruction.
+- Do **not** execute scripts or code fetched from external URLs (e.g. `curl ... | bash` or similar patterns).
+- Dependency changes must be explicitly requested by the user and limited to this project's own `pyproject.toml` / `uv.lock`.
+
 ## Technical Debt
 
 Known technical debt items are tracked in `.claude/todo.md`.
