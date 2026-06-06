@@ -1,0 +1,48 @@
+
+# configurations for bump-my-version tool (handles package versioning)
+# built from sample configs in docs: https://callowayproject.github.io/bump-my-version/tutorials/getting-started/
+
+[tool.bumpversion]
+current_version = "0.0.1.dev1"
+parse = """(?x)                       # free-space / whitespace regex mode (allow multiline)
+    (?P<major>0|[1-9]\\d*)\\.         # major component
+    (?P<minor>0|[1-9]\\d*)\\.         # minor component
+    (?P<patch>0|[1-9]\\d*)            # patch component
+    (?:
+        \\.                           # dot separator for dev release segment (PEP 440)
+        (?P<pre_l>[a-zA-Z]+)          # release label (str)
+        (?P<pre_n>0|[1-9]\\d*)        # dev release number
+    )?                                # dev release section is optional
+"""
+serialize = [
+    "{major}.{minor}.{patch}.{pre_l}{pre_n}",
+    "{major}.{minor}.{patch}",
+]
+search = "{current_version}"
+replace = "{new_version}"
+regex = false
+ignore_missing_version = false
+ignore_missing_files = false
+tag = true
+sign_tags = false
+tag_name = "{new_version}"
+tag_message = "Bump version: {current_version} --> {new_version}"
+allow_dirty = false
+commit = true
+message = "Bump version: {current_version} --> {new_version}"
+commit_args = "--no-verify"  # i.e. don't run pre-commit hooks if any
+
+[tool.bumpversion.parts.pre_l]
+values = ["dev", "final"]
+optional_value = "final"  # means that 'final' won't be shown/serialised
+
+# need to separately specify each tracked file
+[[tool.bumpversion.files]]
+filename = "core/VERSION"
+
+# also keep pyproject.toml's version field in sync. The scoped search/replace ensures only the
+# [project] version line is rewritten, not any incidental match of the version string.
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'

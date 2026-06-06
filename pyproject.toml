@@ -2,7 +2,7 @@
 
 [project]
 name = "traffic-api-data"
-version = "0.0.1"
+version = "0.0.1.dev1"
 requires-python = ">= 3.12"
 dependencies = [
     "fastapi",
@@ -23,6 +23,7 @@ dev = [
     "marimo"
 ]
 ci = [
+    "bump-my-version",
     "pre-commit",
     "pandas",  # only used by testing utils for fixed width txt file i/o
     "pytest",
