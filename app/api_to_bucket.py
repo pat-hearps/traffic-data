@@ -123,10 +123,11 @@ def group_segments_by_freeway(properties_by_segment: dict) -> dict:
 def dateparse_df(df: pl.DataFrame, dt_col: str = "publishedTime") -> pl.DataFrame:
     log.debug(f"dateparse_df input dtype: {dt_col}={df[dt_col].dtype}, sample={df[dt_col][0]!r}")
     df = df.with_columns(
-        publishedTime=pl.col(dt_col)
+        pl.col(dt_col)
         .str.to_datetime()
         .cast(pl.Datetime)
         .dt.replace_time_zone(MELB_TZ_NAME)
+        .alias(dt_col)
     )
     log.debug(f"dateparse_df output dtype: {dt_col}={df[dt_col].dtype}, sample={df[dt_col][0]!r}")
     return df
