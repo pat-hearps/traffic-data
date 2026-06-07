@@ -29,6 +29,10 @@ ci = [
     "pytest",
     "ruff"
 ]
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
 [tool.uv]
 exclude-newer = "2 weeks"
 

@@ -20,8 +20,10 @@ def read_test_data(filepath: str | Path) -> pl.DataFrame:
     df = pl.from_pandas(df)
 
     if dt_cols:
-        col_exprs = {dt_col: pl.col(dt_col).str.to_datetime() for dt_col in dt_cols}
-        df = df.with_columns(**col_exprs)
+        for dt_col in dt_cols:
+            # Use eager Series evaluation: newer Polars rejects lazy to_datetime() when the
+            # string data contains timezone offsets (requires explicit format or eager path).
+            df = df.with_columns(df[dt_col].str.to_datetime().alias(dt_col))
 
     return df
 

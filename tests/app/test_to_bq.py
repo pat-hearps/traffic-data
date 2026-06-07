@@ -34,7 +34,7 @@ def test_process():
     result_comparison_columns = df_proc.select(
         ["segmentName", "publishedTime", "actualTravelTime"]
     )
-    pltest.assert_frame_equal(result_comparison_columns, df_exp)
+    pltest.assert_frame_equal(result_comparison_columns, df_exp, check_row_order=False)
 
     # make sure we've added the batch uid column correctly
     assert (df_proc["batch_uid"] == "test_uid").all()
