@@ -52,12 +52,14 @@ def test_process_already_unique_data_unchanged():
     # When every row has distinct fact values, no rows should be dropped
     dt1 = TZ_MELB.localize(datetime(2025, 1, 1, 1, 0)).astimezone(pytz.UTC)
     dt2 = TZ_MELB.localize(datetime(2025, 1, 1, 1, 6)).astimezone(pytz.UTC)
-    df = pl.DataFrame({
-        "segmentName": ["A", "A"],
-        "publishedTime": [dt1, dt2],
-        "actualTravelTime": [100, 200],  # different values → both rows kept
-        "raw_file_path": ["f1.pqt", "f2.pqt"],
-    })
+    df = pl.DataFrame(
+        {
+            "segmentName": ["A", "A"],
+            "publishedTime": [dt1, dt2],
+            "actualTravelTime": [100, 200],  # different values → both rows kept
+            "raw_file_path": ["f1.pqt", "f2.pqt"],
+        }
+    )
     result = to_bq.process("uid", df)
     assert len(result) == 2
 
@@ -74,12 +76,14 @@ def test_process_keeps_earliest_row_on_dedup():
     # When two rows have identical fact values, the one with the earlier publishedTime is kept
     dt_early = TZ_MELB.localize(datetime(2025, 1, 1, 1, 0)).astimezone(pytz.UTC)
     dt_late = TZ_MELB.localize(datetime(2025, 1, 1, 1, 6)).astimezone(pytz.UTC)
-    df = pl.DataFrame({
-        "segmentName": ["A", "A"],
-        "publishedTime": [dt_late, dt_early],  # late row first to test sort-before-dedup
-        "actualTravelTime": [100, 100],  # identical → should be deduplicated to one row
-        "raw_file_path": ["f1.pqt", "f2.pqt"],
-    })
+    df = pl.DataFrame(
+        {
+            "segmentName": ["A", "A"],
+            "publishedTime": [dt_late, dt_early],  # late row first to test sort-before-dedup
+            "actualTravelTime": [100, 100],  # identical → should be deduplicated to one row
+            "raw_file_path": ["f1.pqt", "f2.pqt"],
+        }
+    )
     result = to_bq.process("uid", df)
     assert len(result) == 1
     assert result["publishedTime"][0] == dt_early

@@ -81,6 +81,6 @@ def infer_datetime_cols(df: pd.DataFrame) -> list:
         try:
             datetime.fromisoformat(val)
             inferred_dt_cols.append(colname)
-        except ValueError as exc:
+        except ValueError:
             pass
     return inferred_dt_cols

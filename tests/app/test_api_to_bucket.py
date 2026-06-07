@@ -1,7 +1,6 @@
 import copy
 
 import polars as pl
-import polars.testing as pltest
 import pytest
 
 from app.api_to_bucket import (
@@ -24,9 +23,7 @@ def test_features_as_segment_dict_basic(vicroads_response):
     result = features_as_segment_dict(features)
     # All features that have a segmentName should appear
     expected_names = {
-        f["properties"]["segmentName"]
-        for f in features
-        if f["properties"].get("segmentName")
+        f["properties"]["segmentName"] for f in features if f["properties"].get("segmentName")
     }
     assert set(result.keys()) == expected_names
 

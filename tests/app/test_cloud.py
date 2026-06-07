@@ -1,6 +1,5 @@
 import io
-from contextlib import contextmanager
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 
 import polars as pl
 
@@ -62,7 +61,9 @@ def test_move_gs_files_batches_correctly():
     mock_bucket.get_blob.return_value = mock_blob
 
     with patch("app.cloud.storage.Client", return_value=mock_client):
-        move_gs_files(files, src_dir="raw1", trg_dir="read1", bucket_name=GCS_BUCKET, n_per_batch=100)
+        move_gs_files(
+            files, src_dir="raw1", trg_dir="read1", bucket_name=GCS_BUCKET, n_per_batch=100
+        )
 
     # 250 files / 100 per batch = 3 batches → delete_blobs called 3 times
     assert mock_bucket.delete_blobs.call_count == 3
