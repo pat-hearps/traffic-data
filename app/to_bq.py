@@ -81,8 +81,10 @@ def load_from_bucket(dt_glob: str, raw_dir: str) -> pl.DataFrame | None:
     if dt_glob:
         try:
             date.fromisoformat(dt_glob.replace("/", "-"))
-        except ValueError:
-            log.error(f"dt_glob should be format YYYY/mm/dd - received {dt_glob}", exc_info=True)
+        except ValueError as exc:
+            raise ValueError(
+                f"dt_glob should be format YYYY/mm/dd - received {dt_glob!r}"
+            ) from exc
     else:
         dt_glob = "**"
 
