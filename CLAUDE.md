@@ -45,9 +45,22 @@ Scans all parquet files from GCS `raw1/` (or a specific `YYYY/mm/dd` date prefix
 
 ## Testing
 
-Tests use pytest with fixed-width `.txt` files as test data (human-readable, git-friendly). `tests/utils.py` handles reading/writing these files with datetime inference. The current test (`tests/app/test_to_bq.py`) exercises the deduplication logic in `to_bq.process()` without requiring GCP access.
+Tests use pytest with no GCP access required. All cloud/network I/O is mocked with `unittest.mock`. No additional test dependencies beyond the `ci` extras group.
 
-Test data files live in `tests/data_files/`. To add new test data, use `tests/utils.py` helpers to write/read the fixed-width format — do not hand-edit the `.txt` files.
+**Test layout:**
+- `tests/conftest.py` — sets dummy env vars (`API_KEY_TRAFFIC`, `GCS_PROJECT`, `GCS_BUCKET`) before any module import so pytest can collect without real credentials. Also provides shared `vicroads_response` and `raw_traffic_df` fixtures.
+- `tests/core/test_utils.py` — pure helpers in `core/utils.py`
+- `tests/app/test_api_to_bucket.py` — the full VicRoads API response parsing pipeline
+- `tests/app/test_to_bq.py` — deduplication logic, batch metadata, `load_from_bucket` (mocked)
+- `tests/app/test_cloud.py` — GCS and BigQuery I/O helpers (mocked)
+- `tests/app/test_main.py` — FastAPI endpoint smoke tests and orchestration call-chain tests
+- `tests/test_versioning.py` — version file sync and bump-my-version dry-run
+
+**Test data files** live in `tests/data_files/` (force-added — `*.json` and `*.txt` are globally gitignored):
+- `bucket_raw.txt` — fixed-width format, used by dedup tests; read/write via `tests/utils.py` helpers, do not hand-edit
+- `vicroads_api_sample.json` — trimmed real VicRoads API response (2 Eastern Fwy segments + 1 Tullamarine + 1 no-segmentName feature; geometry reduced to first/last coord at 2dp)
+
+**Polars compat note:** `str.to_datetime()` must be called on an eager `Series`, not a lazy `col()` Expr, when string data contains timezone offsets. This applies in both `app/api_to_bucket.py::dateparse_df` and `tests/utils.py::read_test_data`.
 
 ## Epistemic Honesty
 
