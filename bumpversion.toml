@@ -3,7 +3,7 @@
 # built from sample configs in docs: https://callowayproject.github.io/bump-my-version/tutorials/getting-started/
 
 [tool.bumpversion]
-current_version = "0.0.1"
+current_version = "0.0.2.dev0"
 parse = """(?x)                       # free-space / whitespace regex mode (allow multiline)
     (?P<major>0|[1-9]\\d*)\\.         # major component
     (?P<minor>0|[1-9]\\d*)\\.         # minor component
