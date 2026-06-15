@@ -3,8 +3,37 @@ from unittest.mock import MagicMock, patch
 
 import polars as pl
 
-from app.cloud import move_gs_files, write_df_pqt, write_to_bigquery
+from app.cloud import gs_files_exist, move_gs_files, write_df_pqt, write_to_bigquery
 from core.config import GCS_BUCKET, GCS_PROJECT
+
+
+# ---------------------------------------------------------------------------
+# gs_files_exist
+# ---------------------------------------------------------------------------
+
+
+def test_gs_files_exist_returns_true_when_blobs_present():
+    mock_client = MagicMock()
+    mock_blob = MagicMock()
+    mock_client.list_blobs.return_value = iter([mock_blob])
+
+    with patch("app.cloud.storage.Client", return_value=mock_client):
+        result = gs_files_exist("raw1/2025/03/05/", bucket_name=GCS_BUCKET)
+
+    assert result is True
+    mock_client.list_blobs.assert_called_once_with(
+        GCS_BUCKET, prefix="raw1/2025/03/05/", max_results=1
+    )
+
+
+def test_gs_files_exist_returns_false_when_no_blobs():
+    mock_client = MagicMock()
+    mock_client.list_blobs.return_value = iter([])
+
+    with patch("app.cloud.storage.Client", return_value=mock_client):
+        result = gs_files_exist("raw1/", bucket_name=GCS_BUCKET)
+
+    assert result is False
 
 
 # ---------------------------------------------------------------------------
