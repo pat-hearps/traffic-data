@@ -143,15 +143,21 @@ def _make_mock_scan(df):
 
 
 def test_load_from_bucket_valid_date_builds_correct_path(raw_traffic_df):
-    with patch("app.to_bq.pl.scan_parquet", return_value=_make_mock_scan(raw_traffic_df)) as mock:
-        to_bq.load_from_bucket("2025/03/05", "raw1")
+    with patch("app.to_bq.acl.gs_files_exist", return_value=True):
+        with patch(
+            "app.to_bq.pl.scan_parquet", return_value=_make_mock_scan(raw_traffic_df)
+        ) as mock:
+            to_bq.load_from_bucket("2025/03/05", "raw1")
     called_path = mock.call_args[0][0]
     assert called_path == f"gs://{GCS_BUCKET}/raw1/2025/03/05/*"
 
 
 def test_load_from_bucket_none_uses_glob_star(raw_traffic_df):
-    with patch("app.to_bq.pl.scan_parquet", return_value=_make_mock_scan(raw_traffic_df)) as mock:
-        to_bq.load_from_bucket(None, "raw1")
+    with patch("app.to_bq.acl.gs_files_exist", return_value=True):
+        with patch(
+            "app.to_bq.pl.scan_parquet", return_value=_make_mock_scan(raw_traffic_df)
+        ) as mock:
+            to_bq.load_from_bucket(None, "raw1")
     called_path = mock.call_args[0][0]
     assert "**" in called_path
 
@@ -175,6 +181,24 @@ def test_load_from_bucket_scan_parquet_not_called_on_invalid_glob():
 
 def test_load_from_bucket_empty_result_returns_none():
     empty_df = pl.DataFrame({"col": []})
-    with patch("app.to_bq.pl.scan_parquet", return_value=_make_mock_scan(empty_df)):
-        result = to_bq.load_from_bucket("2025/03/05", "raw1")
+    with patch("app.to_bq.acl.gs_files_exist", return_value=True):
+        with patch("app.to_bq.pl.scan_parquet", return_value=_make_mock_scan(empty_df)):
+            result = to_bq.load_from_bucket("2025/03/05", "raw1")
     assert result is None
+
+
+def test_load_from_bucket_no_files_returns_none_without_scan():
+    with patch("app.to_bq.acl.gs_files_exist", return_value=False):
+        with patch("app.to_bq.pl.scan_parquet") as mock_scan:
+            result = to_bq.load_from_bucket("2025/03/05", "raw1")
+    assert result is None
+    mock_scan.assert_not_called()
+
+
+def test_raw_to_loaded_no_data_exits_gracefully():
+    with patch("app.to_bq.load_from_bucket", return_value=None):
+        with patch("app.to_bq.acl.write_to_bigquery") as mock_bq:
+            with patch("app.to_bq.acl.move_gs_files") as mock_move:
+                to_bq.raw_to_loaded()
+    mock_bq.assert_not_called()
+    mock_move.assert_not_called()

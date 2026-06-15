@@ -4,7 +4,6 @@ from itertools import batched
 
 import gcsfs
 import polars as pl
-from google.api_core.exceptions import NotFound
 from google.cloud import bigquery, storage
 
 from core.config import GCS_BUCKET, GCS_PROJECT
@@ -46,6 +45,13 @@ def write_to_bigquery(df: pl.DataFrame, tablename: str, project: str = GCS_PROJE
         log.info("job created, calling, waiting")
     job.result()  # Waits for the job to complete
     log.info("load job finished")
+
+
+def gs_files_exist(prefix: str, bucket_name: str = GCS_BUCKET) -> bool:
+    """Return True if at least one object exists under prefix; lists at most one blob."""
+    client = storage.Client(project=GCS_PROJECT)
+    blobs = client.list_blobs(bucket_name, prefix=prefix, max_results=1)
+    return any(True for _ in blobs)
 
 
 def move_gs_files(
