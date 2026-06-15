@@ -17,6 +17,9 @@ def raw_to_loaded(dt_glob: str | None = None, raw_dir: str = "raw1", read_dir: s
     uid = str(uuid.uuid4())
 
     df = load_from_bucket(dt_glob, raw_dir)
+    if df is None:
+        log.info("No data in bucket to load - exiting gracefully")
+        return
 
     # to send for moving to 'read' at end, get list prior to deduplication
     all_file_paths = list(df.get_column(LBL_FILEPATH).unique())
@@ -81,12 +84,21 @@ def load_from_bucket(dt_glob: str, raw_dir: str) -> pl.DataFrame | None:
     if dt_glob:
         try:
             date.fromisoformat(dt_glob.replace("/", "-"))
-        except ValueError:
-            log.error(f"dt_glob should be format YYYY/mm/dd - received {dt_glob}", exc_info=True)
+        except ValueError as exc:
+            raise ValueError(
+                f"dt_glob should be format YYYY/mm/dd - received {dt_glob!r}"
+            ) from exc
+        glob_part = dt_glob
+        prefix = f"{raw_dir}/{dt_glob}/"
     else:
-        dt_glob = "**"
+        glob_part = "**"
+        prefix = f"{raw_dir}/"
 
-    gs_path = f"gs://{GCS_BUCKET}/{raw_dir}/{dt_glob}/*"
+    if not acl.gs_files_exist(prefix):
+        log.info(f"No files found under {prefix} - nothing to load")
+        return None
+
+    gs_path = f"gs://{GCS_BUCKET}/{raw_dir}/{glob_part}/*"
     log.info(f"Reading from {gs_path}")
 
     df = pl.scan_parquet(gs_path, include_file_paths=LBL_FILEPATH).collect()

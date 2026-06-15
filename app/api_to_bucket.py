@@ -65,8 +65,7 @@ def process_traffic_data(resp_dict: dict) -> pl.DataFrame:
     )
     parsed_segments = [parse_data(data) for data in filtered_segments.values()]
     log.debug(
-        f"parsed_segment_count={len(parsed_segments)}\n"
-        f"first_parsed_record={parsed_segments[0]}"
+        f"parsed_segment_count={len(parsed_segments)}\nfirst_parsed_record={parsed_segments[0]}"
     )
     df = pl.DataFrame(parsed_segments)
     result = dateparse_df(df)
@@ -80,10 +79,7 @@ def save_to_gcs_bucket(df: pl.DataFrame, now: datetime) -> None:
     destination = f"gs://{GCS_BUCKET}/raw1/{filepath}"
     log.info(f"Writing current data (len={len(df)}) to storage at {now.isoformat()}")
     log.debug(
-        f"{destination=}\n"
-        f"df.shape={df.shape}\n"
-        f"df.schema={df.schema}\n"
-        f"dataframe=\n{df.head(3)}"
+        f"{destination=}\ndf.shape={df.shape}\ndf.schema={df.schema}\ndataframe=\n{df.head(3)}"
     )
     from app.cloud import write_df_pqt
 
@@ -122,11 +118,14 @@ def group_segments_by_freeway(properties_by_segment: dict) -> dict:
 
 def dateparse_df(df: pl.DataFrame, dt_col: str = "publishedTime") -> pl.DataFrame:
     log.debug(f"dateparse_df input dtype: {dt_col}={df[dt_col].dtype}, sample={df[dt_col][0]!r}")
+    # Use eager Series evaluation: newer Polars rejects lazy to_datetime() when the
+    # string data contains timezone offsets (requires explicit format or eager path).
     df = df.with_columns(
-        publishedTime=pl.col(dt_col)
+        df[dt_col]
         .str.to_datetime()
         .cast(pl.Datetime)
         .dt.replace_time_zone(MELB_TZ_NAME)
+        .alias(dt_col)
     )
     log.debug(f"dateparse_df output dtype: {dt_col}={df[dt_col].dtype}, sample={df[dt_col][0]!r}")
     return df

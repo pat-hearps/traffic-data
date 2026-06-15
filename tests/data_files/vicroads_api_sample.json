@@ -1,0 +1,126 @@
+{
+  "_note": "Trimmed from a real VicRoads freeway-travel-time API response. Two Eastern Fwy segments + one Tullamarine Fwy segment (to test FWY_FILTER filtering) + one feature with no segmentName (to test the skip branch). Geometry reduced to first and last coordinate only, rounded to 2 dp.",
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[145.16, -37.80], [145.18, -37.80]]
+      },
+      "properties": {
+        "id": "Streams:898166",
+        "source": {
+          "sourceName": "Streams",
+          "sourceId": 898166
+        },
+        "freewayName": "Eastern Fwy",
+        "segmentName": "Blackburn Rd to Springvale Rd",
+        "direction": "Outbound",
+        "publishedTime": "2026-06-07T10:00:00.029+10:00",
+        "enabled": true,
+        "parentPathId": 898157,
+        "pathValid": true,
+        "actualTravelTime": 73,
+        "nominalTravelTime": 59,
+        "averageSpeed": 81,
+        "condition": "Light",
+        "hasOverride": false,
+        "roundedTravelTime": 120,
+        "varianceRoundedNominal": 61,
+        "varianceNominal": 14,
+        "dataSubstitution": 40.82876295,
+        "includesRampWaitTime": false,
+        "delay": 13,
+        "excessDelay": 0,
+        "orderOnParent": 9
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[145.03, -37.79], [145.06, -37.78]]
+      },
+      "properties": {
+        "id": "Streams:898159",
+        "source": {
+          "sourceName": "Streams",
+          "sourceId": 898159
+        },
+        "freewayName": "Eastern Fwy",
+        "segmentName": "Chandler Hwy to Burke Rd",
+        "direction": "Outbound",
+        "publishedTime": "2026-06-07T10:00:00.044+10:00",
+        "enabled": true,
+        "parentPathId": 898157,
+        "pathValid": true,
+        "actualTravelTime": 135,
+        "nominalTravelTime": 119,
+        "averageSpeed": 88,
+        "condition": "Light",
+        "hasOverride": false,
+        "roundedTravelTime": 180,
+        "varianceRoundedNominal": 61,
+        "varianceNominal": 16,
+        "dataSubstitution": 83.89830508,
+        "includesRampWaitTime": false,
+        "delay": 16,
+        "excessDelay": 0,
+        "orderOnParent": 2
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[144.93, -37.81], [144.91, -37.81]]
+      },
+      "properties": {
+        "id": "Streams:1728913",
+        "source": {
+          "sourceName": "Streams",
+          "sourceId": 1728913
+        },
+        "freewayName": "Tullamarine Fwy",
+        "segmentName": "Footscray Rd to WGT Mackenzie Rd",
+        "direction": "Outbound",
+        "publishedTime": "2026-06-07T10:00:00.107+10:00",
+        "enabled": true,
+        "parentPathId": 1728912,
+        "pathValid": true,
+        "actualTravelTime": 122,
+        "nominalTravelTime": 122,
+        "averageSpeed": 80,
+        "condition": "Light",
+        "hasOverride": false,
+        "roundedTravelTime": 180,
+        "varianceRoundedNominal": 58,
+        "varianceNominal": 0,
+        "dataSubstitution": 0.0,
+        "includesRampWaitTime": false,
+        "delay": 0,
+        "excessDelay": 0,
+        "orderOnParent": 1
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[144.97, -37.82], [144.99, -37.82]]
+      },
+      "properties": {
+        "id": "Streams:9999999",
+        "source": {
+          "sourceName": "Streams",
+          "sourceId": 9999999
+        },
+        "freewayName": "Eastern Fwy",
+        "publishedTime": "2026-06-07T10:00:00.000+10:00",
+        "enabled": false,
+        "parentPathId": 898157
+      }
+    }
+  ]
+}
