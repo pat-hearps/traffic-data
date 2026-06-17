@@ -2,7 +2,7 @@
 
 [project]
 name = "traffic-api-data"
-version = "0.0.2"
+version = "0.0.3.dev0"
 requires-python = "== 3.13.7"
 dependencies = [
     "fastapi",
