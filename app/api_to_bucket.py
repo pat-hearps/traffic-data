@@ -121,11 +121,7 @@ def dateparse_df(df: pl.DataFrame, dt_col: str = "publishedTime") -> pl.DataFram
     # Use eager Series evaluation: newer Polars rejects lazy to_datetime() when the
     # string data contains timezone offsets (requires explicit format or eager path).
     df = df.with_columns(
-        df[dt_col]
-        .str.to_datetime()
-        .cast(pl.Datetime)
-        .dt.replace_time_zone(MELB_TZ_NAME)
-        .alias(dt_col)
+        pl.col(dt_col).str.to_datetime(format="%+").dt.convert_time_zone(MELB_TZ_NAME)
     )
     log.debug(f"dateparse_df output dtype: {dt_col}={df[dt_col].dtype}, sample={df[dt_col][0]!r}")
     return df
