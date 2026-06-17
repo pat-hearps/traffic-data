@@ -1,4 +1,5 @@
 import copy
+from datetime import datetime
 
 import polars as pl
 import pytest
@@ -10,8 +11,7 @@ from app.api_to_bucket import (
     parse_data,
     process_traffic_data,
 )
-from core.config import FWY_FILTER, MELB_TZ_NAME
-
+from core.config import FWY_FILTER, MELB_TZ_NAME, TZ_MELB
 
 # ---------------------------------------------------------------------------
 # features_as_segment_dict
@@ -143,28 +143,32 @@ def test_parse_data_mutates_input():
 # ---------------------------------------------------------------------------
 
 
-def test_dateparse_df_converts_default_column():
-    df = pl.DataFrame({"publishedTime": ["2025-03-05T03:48:00+11:00"]})
+@pytest.fixture(scope="function")
+def a_dt() -> datetime:
+    """Python datetime object at now with Australia/Melbourne timezone"""
+    return datetime.now(tz=TZ_MELB)
+
+
+def test_dateparse_df_converts_default_column(a_dt: datetime):
+    df = pl.DataFrame({"publishedTime": [a_dt.isoformat()]})
     result = dateparse_df(df)
-    assert result["publishedTime"].dtype == pl.Datetime("us", MELB_TZ_NAME)
+    assert result["publishedTime"].dtype == pl.Datetime("us", "UTC")
+    assert result["publishedTime"][0] == a_dt
 
 
-def test_dateparse_df_custom_column():
+def test_dateparse_df_custom_column(a_dt: datetime):
     # Fix: dt_col should be written back to the same column, not a new publishedTime col
-    df = pl.DataFrame({"ts": ["2025-03-05T03:48:00+11:00"], "other": ["x"]})
+    df = pl.DataFrame({"ts": [a_dt.isoformat()], "other": ["x"]})
     result = dateparse_df(df, dt_col="ts")
-    assert result["ts"].dtype == pl.Datetime("us", MELB_TZ_NAME)
+    assert result["ts"].dtype == pl.Datetime("us", "UTC")
     assert "publishedTime" not in result.columns
     assert "other" in result.columns
+    assert result["ts"][0] == a_dt
 
 
-def test_dateparse_df_preserves_other_columns():
+def test_dateparse_df_preserves_other_columns(a_dt: datetime):
     df = pl.DataFrame(
-        {
-            "publishedTime": ["2025-03-05T03:48:00+11:00"],
-            "actualTravelTime": [111],
-            "segmentName": ["foo"],
-        }
+        {"publishedTime": [a_dt.isoformat()], "actualTravelTime": [111], "segmentName": ["foo"]}
     )
     result = dateparse_df(df)
     assert set(result.columns) == {"publishedTime", "actualTravelTime", "segmentName"}
