@@ -152,7 +152,7 @@ def a_dt() -> datetime:
 def test_dateparse_df_converts_default_column(a_dt: datetime):
     df = pl.DataFrame({"publishedTime": [a_dt.isoformat()]})
     result = dateparse_df(df)
-    assert result["publishedTime"].dtype == pl.Datetime("us", "UTC")
+    assert result["publishedTime"].dtype == pl.Datetime("us", MELB_TZ_NAME)
     assert result["publishedTime"][0] == a_dt
 
 
@@ -160,7 +160,7 @@ def test_dateparse_df_custom_column(a_dt: datetime):
     # Fix: dt_col should be written back to the same column, not a new publishedTime col
     df = pl.DataFrame({"ts": [a_dt.isoformat()], "other": ["x"]})
     result = dateparse_df(df, dt_col="ts")
-    assert result["ts"].dtype == pl.Datetime("us", "UTC")
+    assert result["ts"].dtype == pl.Datetime("us", MELB_TZ_NAME)
     assert "publishedTime" not in result.columns
     assert "other" in result.columns
     assert result["ts"][0] == a_dt
